@@ -1,0 +1,26 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: my-spring-app:latest
+    ports:
+      - "8080:8080"
+    env_file:
+      - .env
+    environment:
+      - SPRING_PROFILES_ACTIVE=dev
+
+    develop:
+      watch:
+        - path: ./pom.xml
+          action: rebuild
+
+        - path: ./src
+          action: rebuild
+
+        - path: ./src/main/resources
+          action: sync
+          target: /app/resources
+
+    restart: unless-stopped
