@@ -16,4 +16,4 @@ RDS_PORT=5432
 - Senha
   - engsoftware 
 
-Após inserir as credenciais basta rodar ```docker compose up --watch``` para que a imagem seja rebuildada sempre que houver uma alteração e um container seja executado automaticamente.
+Após inserir as credenciais basta rodar ```docker compose up --build --watch``` para que a imagem seja rebuildada sempre que houver uma alteração e um container seja executado automaticamente.
