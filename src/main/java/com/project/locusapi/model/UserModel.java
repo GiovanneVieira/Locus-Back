@@ -2,7 +2,6 @@ package com.project.locusapi.model;
 
 import com.project.locusapi.constant.Role;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Size;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -35,7 +34,6 @@ public class UserModel implements UserDetails {
     private String email;
 
     @Column(name = "passowrd", nullable = false)
-    @Size(min = 8, message = "Sua senha deve conter ao menos 8 caracteres")
     private String password;
 
     @Column(name = "role", updatable = true)
@@ -49,6 +47,8 @@ public class UserModel implements UserDetails {
     @UpdateTimestamp
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private List<RefreshToken> refreshToken;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

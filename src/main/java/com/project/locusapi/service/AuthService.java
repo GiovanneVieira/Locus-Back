@@ -1,9 +1,11 @@
 package com.project.locusapi.service;
 
+import com.project.locusapi.dto.AuthRequestDTO;
 import com.project.locusapi.dto.AuthResponseDTO;
 import com.project.locusapi.dto.AuthResultDTO;
 import com.project.locusapi.dto.UserRequestDTO;
 import com.project.locusapi.mapper.UserMapper;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseCookie;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -26,12 +28,12 @@ public class AuthService {
         this.userMapper = new UserMapper();
     }
 
-    public AuthResultDTO registerUser(UserRequestDTO userDto) {
+    public AuthResultDTO registerUser(@Valid UserRequestDTO userDto) {
         var savedUser = userService.createUser(userDto);
         var user = appUserDetailsService.loadUserByUsername(userDto.email());
         authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(userDto.email(), userDto.password()));
 
-        String token = jwtService.generateToken(user);
+        String token = jwtService.generateAccessToken(user);
 
         return new AuthResultDTO(
                 new AuthResponseDTO(user.getUsername(), token),
@@ -39,12 +41,12 @@ public class AuthService {
         );
     }
 
-    public AuthResultDTO loginUser(UserRequestDTO userDto) {
+    public AuthResultDTO loginUser(@Valid AuthRequestDTO userDto) {
         var authenticatedUser = appUserDetailsService.loadUserByUsername(userDto.email());
         var authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(userDto.email(), userDto.password())
         );
-        String token = jwtService.generateToken(authenticatedUser);
+        String token = jwtService.generateAccessToken(authenticatedUser);
         return new AuthResultDTO(
                 new AuthResponseDTO(token, authenticatedUser.getUsername()),
                 generateCookie(token)

@@ -2,6 +2,7 @@ package com.project.locusapi.controller;
 
 import com.project.locusapi.dto.UserRequestDTO;
 import com.project.locusapi.service.UserService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -19,7 +20,7 @@ public class UserController {
     }
 
     @PostMapping
-    public ResponseEntity<?> postUser(@RequestBody UserRequestDTO userRequestDTO) {
+    public ResponseEntity<?> postUser(@RequestBody @Valid UserRequestDTO userRequestDTO) {
         var user = userService.createUser(userRequestDTO);
         if (user == null) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Erro ao criar usuario");

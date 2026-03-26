@@ -6,6 +6,7 @@ import com.project.locusapi.dto.UserResponseDTO;
 import com.project.locusapi.mapper.UserMapper;
 import com.project.locusapi.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.validation.Valid;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -26,7 +27,7 @@ public class UserService {
         this.passwordEncoder = new BCryptPasswordEncoder();
     }
 
-    public UserResponseDTO createUser(UserRequestDTO requestDTO) {
+    public UserResponseDTO createUser(@Valid UserRequestDTO requestDTO) {
         var user = this.userMapper.toUserModel(requestDTO);
         user.setPassword(passwordEncoder.encode(requestDTO.password()));
         user.setRole(Role.USER);
