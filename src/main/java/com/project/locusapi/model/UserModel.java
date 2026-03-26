@@ -10,6 +10,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
@@ -33,7 +34,7 @@ public class UserModel implements UserDetails {
     @Column(name = "email", unique = true, nullable = false)
     private String email;
 
-    @Column(name = "passowrd", nullable = false)
+    @Column(name = "password", nullable = false)
     private String password;
 
     @Column(name = "role", updatable = true)
@@ -47,8 +48,10 @@ public class UserModel implements UserDetails {
     @UpdateTimestamp
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
+
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    private List<RefreshToken> refreshToken;
+    @Builder.Default
+    private List<RefreshToken> refreshToken = new ArrayList<>();
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -59,6 +62,13 @@ public class UserModel implements UserDetails {
             return List.of(new SimpleGrantedAuthority("HOST"), new SimpleGrantedAuthority("USER"));
         }
         return List.of(new SimpleGrantedAuthority("USER"));
+    }
+
+    public void addRefreshToken(RefreshToken token) {
+        if (this.refreshToken == null) {
+            this.refreshToken = new ArrayList<>();
+        }
+        this.refreshToken.add(token);
     }
 
     @Override

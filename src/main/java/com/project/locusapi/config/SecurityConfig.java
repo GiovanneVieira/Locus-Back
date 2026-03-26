@@ -22,20 +22,21 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.List;
 
-import static org.springframework.http.HttpMethod.GET;
-
 @Slf4j
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
 
     private final List<String> authorizedOrigins = List.of("http://localhost:8080", "http://localhost:5173");
+
     private final AppUserDetailsService userDetailsService;
     private final SecurityFilter securityFilter;
+    private final List<String> publicRoutes;
 
-    public SecurityConfig(AppUserDetailsService userDetailsService, SecurityFilter securityFilter) {
+    public SecurityConfig(AppUserDetailsService userDetailsService, SecurityFilter securityFilter, List<String> publicRoutes) {
         this.userDetailsService = userDetailsService;
         this.securityFilter = securityFilter;
+        this.publicRoutes = publicRoutes;
     }
 
     @Bean
@@ -45,10 +46,8 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .httpBasic(Customizer.withDefaults())
                 .authorizeHttpRequests((authorize) -> authorize
-                        .requestMatchers("/user/**").permitAll()
-                        .requestMatchers("/auth/register", "/auth/login").permitAll()
-                        .requestMatchers(GET, "/hospedagens/**").permitAll()
-                        .requestMatchers("/error").permitAll()
+                        .requestMatchers(publicRoutes.toArray(String[]::new)).permitAll()
+                        .anyRequest().authenticated()
                 ).sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class);
 

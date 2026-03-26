@@ -1,8 +1,8 @@
 package com.project.locusapi.controller;
 
-import com.project.locusapi.dto.AuthRequestDTO;
-import com.project.locusapi.dto.AuthResponseDTO;
-import com.project.locusapi.dto.UserRequestDTO;
+import com.project.locusapi.dto.auth.AuthRequestDTO;
+import com.project.locusapi.dto.auth.AuthResponseDTO;
+import com.project.locusapi.dto.user.UserRequestDTO;
 import com.project.locusapi.service.AuthService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpHeaders;
@@ -23,7 +23,7 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<?> registerUser(@RequestBody @Valid UserRequestDTO userRequestDTO) {
+    public ResponseEntity<AuthResponseDTO> registerUser(@RequestBody @Valid UserRequestDTO userRequestDTO) {
         var response = this.authService.registerUser(userRequestDTO);
         return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, response.cookie().toString()).body(response.responseDTO());
     }

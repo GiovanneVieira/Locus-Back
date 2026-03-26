@@ -1,8 +1,8 @@
 package com.project.locusapi.service;
 
 import com.project.locusapi.constant.Role;
-import com.project.locusapi.dto.UserRequestDTO;
-import com.project.locusapi.dto.UserResponseDTO;
+import com.project.locusapi.dto.user.UserRequestDTO;
+import com.project.locusapi.dto.user.UserResponseDTO;
 import com.project.locusapi.mapper.UserMapper;
 import com.project.locusapi.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;

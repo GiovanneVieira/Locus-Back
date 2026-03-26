@@ -1,7 +1,7 @@
 package com.project.locusapi.mapper;
 
-import com.project.locusapi.dto.UserRequestDTO;
-import com.project.locusapi.dto.UserResponseDTO;
+import com.project.locusapi.dto.user.UserRequestDTO;
+import com.project.locusapi.dto.user.UserResponseDTO;
 import com.project.locusapi.model.UserModel;
 import org.springframework.stereotype.Component;
 

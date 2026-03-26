@@ -1,4 +1,4 @@
-package com.project.locusapi.dto;
+package com.project.locusapi.dto.auth;
 
 import org.springframework.http.ResponseCookie;
 

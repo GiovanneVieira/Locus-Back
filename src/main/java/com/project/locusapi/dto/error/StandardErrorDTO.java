@@ -1,4 +1,4 @@
-package com.project.locusapi.dto;
+package com.project.locusapi.dto.error;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 

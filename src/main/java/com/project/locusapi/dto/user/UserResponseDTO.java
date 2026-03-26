@@ -1,4 +1,4 @@
-package com.project.locusapi.dto;
+package com.project.locusapi.dto.user;
 
 import com.project.locusapi.constant.Role;
 

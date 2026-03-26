@@ -1,6 +1,6 @@
 package com.project.locusapi.controller;
 
-import com.project.locusapi.dto.UserRequestDTO;
+import com.project.locusapi.dto.user.UserRequestDTO;
 import com.project.locusapi.service.UserService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
