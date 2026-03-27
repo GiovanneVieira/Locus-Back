@@ -2,7 +2,9 @@ package com.project.locusapi.service;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
+import com.auth0.jwt.interfaces.DecodedJWT;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseCookie;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
@@ -75,5 +77,39 @@ public class JwtService {
                 .build()
                 .verify(token)
                 .getClaim("roles").asList(String.class);
+    }
+
+
+    public boolean isTokenExpired(String token) {
+        try {
+            DecodedJWT decoded = JWT.decode(token);
+            return decoded.getExpiresAtAsInstant().isBefore(Instant.now());
+        } catch (Exception e) {
+            return true;
+        }
+    }
+
+    public ResponseCookie getCleanCookie(String name) {
+        return ResponseCookie.from(name, "")
+                .httpOnly(true)
+                .path("/")
+                .maxAge(0)
+                .build();
+    }
+
+    private ResponseCookie generateCookie(String tokenName, String tokenValue, Integer maxAge) {
+        return ResponseCookie
+                .from(tokenName, tokenValue)
+                .httpOnly(true)
+                .secure(false) // Mude para true em produção
+                .maxAge(maxAge)
+                .sameSite("Lax")
+                .path("/")
+                .build();
+    }
+
+    public List<ResponseCookie> generateCookies(String accessToken, String refreshToken) {
+        return List.of(generateCookie("accessToken", accessToken, jwtAccessExpiration),
+                generateCookie("refreshToken", refreshToken, jwtRefreshExpiration));
     }
 }

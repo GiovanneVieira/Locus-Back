@@ -7,14 +7,18 @@ import com.project.locusapi.dto.auth.AuthResultDTO;
 import com.project.locusapi.dto.user.UserRequestDTO;
 import com.project.locusapi.mapper.UserMapper;
 import com.project.locusapi.model.UserModel;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor // Use o Lombok para gerar o construtor com final
@@ -46,25 +50,24 @@ public class AuthService {
                 new UsernamePasswordAuthenticationToken(email, password)
         );
 
-        var user = (UserModel) authentication.getPrincipal();
-
-        // Gera os tokens
+        var user = (UserModel) authentication.getPrincipal();// Gera os tokens
         assert user != null;
+
         String accessToken = jwtService.generateAccessToken(user);
+        String refreshToken = jwtService.generateRefreshToken(user);
 
-        var savedRefreshToken = refreshTokenService.saveRefreshToken(jwtService.generateRefreshToken(user), user);
-
-        // Sincroniza a lista bidirecional no modelo (Boa prática JPA)
+        var savedRefreshToken = refreshTokenService.saveRefreshToken(refreshToken, user);
         user.addRefreshToken(savedRefreshToken);
 
+        List<ResponseCookie> responseCookies = jwtService.generateCookies(accessToken, refreshToken);
+
         return new AuthResultDTO(
-                new AuthResponseDTO(user.getEmail(), accessToken, savedRefreshToken.getToken()),
-                generateCookie(accessToken)
-        );
+                new AuthResponseDTO(user.getEmail(), accessToken),
+                responseCookies);
     }
 
     @Transactional
-    public AuthResponseDTO refreshToken(String oldToken) {
+    public AuthResultDTO refreshToken(String oldToken) {
         // 1. Validações básicas via JwtService
         var email = jwtService.validateToken(oldToken);
         var type = jwtService.getTokenType(oldToken);
@@ -81,24 +84,28 @@ public class AuthService {
 
         refreshTokenService.deleteByToken(oldToken);
 
-        // 3. Gera os novos
         var user = (UserModel) userDetailsService.loadUserByUsername(email);
-        var newAccess = jwtService.generateAccessToken(user);
+
+        var newAccessToken = jwtService.generateAccessToken(user);
         var newRefreshStr = jwtService.generateRefreshToken(user);
 
         refreshTokenService.saveRefreshToken(newRefreshStr, user);
 
-        return new AuthResponseDTO(user.getUsername(), newAccess, newRefreshStr);
+        List<ResponseCookie> responseCookies = jwtService.generateCookies(newAccessToken, newRefreshStr);
+        return new AuthResultDTO(new AuthResponseDTO(user.getUsername(), newAccessToken), responseCookies);
     }
 
-    private ResponseCookie generateCookie(String token) {
-        return ResponseCookie
-                .from("accessToken", token)
-                .httpOnly(true)
-                .secure(false) // Mude para true em produção
-                .maxAge(3600 * 24 * 7)
-                .sameSite("Lax")
-                .path("/")
-                .build();
+
+    public void logoutUser(String refreshToken, HttpServletResponse response) {
+        if (refreshToken != null && !refreshToken.isBlank()) {
+            refreshTokenService.deleteByToken(refreshToken);
+        }
+
+        ResponseCookie cleanAccess = jwtService.getCleanCookie("accessToken");
+        ResponseCookie cleanRefresh = jwtService.getCleanCookie("refreshToken");
+
+        response.addHeader(HttpHeaders.SET_COOKIE, cleanAccess.toString());
+        response.addHeader(HttpHeaders.SET_COOKIE, cleanRefresh.toString());
     }
+
 }

@@ -1,5 +1,6 @@
 package com.project.locusapi.filter;
 
+import com.auth0.jwt.exceptions.TokenExpiredException;
 import com.project.locusapi.service.AppUserDetailsService;
 import com.project.locusapi.service.JwtService;
 import jakarta.servlet.FilterChain;
@@ -50,6 +51,7 @@ public class SecurityFilter extends OncePerRequestFilter {
         try {
 
             if (token != null) {
+
                 var tokenSubject = this.jwtService.validateToken(token);
                 var tokenType = this.jwtService.getTokenType(token);
                 if (tokenSubject != null && "access".equals(tokenType)) {
@@ -61,6 +63,10 @@ public class SecurityFilter extends OncePerRequestFilter {
                 }
             }
             filterChain.doFilter(request, response);
+        } catch (TokenExpiredException ex) {
+            jwtService.getCleanCookie("accessToken");
+            exceptionResolver.resolveException(request, response, null, ex);
+            return;
         } catch (Exception ex) {
             exceptionResolver.resolveException(request, response, null, ex);
             return;
