@@ -1,9 +1,11 @@
 package com.project.locusapi.service;
 
+import com.project.locusapi.constant.AuthProvider;
 import com.project.locusapi.constant.Role;
 import com.project.locusapi.dto.user.UserRequestDTO;
 import com.project.locusapi.dto.user.UserResponseDTO;
 import com.project.locusapi.mapper.UserMapper;
+import com.project.locusapi.model.UserModel;
 import com.project.locusapi.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
@@ -12,6 +14,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -31,6 +34,7 @@ public class UserService {
         var user = this.userMapper.toUserModel(requestDTO);
         user.setPassword(passwordEncoder.encode(requestDTO.password()));
         user.setRole(Role.USER);
+        user.setAuthProvider(AuthProvider.DEFAULT);
         var response = this.userRepository.save(user);
         return this.userMapper.toUserResponseDTO(response);
     }
@@ -38,6 +42,24 @@ public class UserService {
     public UserResponseDTO getUserById(UUID id) {
         var user = this.userRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Usuario com id " + id + " nao encontrado"));
         return this.userMapper.toUserResponseDTO(user);
+    }
+
+    public Optional<UserModel> getUserByEmail(String email) {
+        return userRepository.findByEmail(email);
+    }
+
+    public UserModel processOAuthUser(String email, String name) {
+        return userRepository.findByEmail(email)
+                .orElseGet(() -> {
+                    // Usuário novo: cria com a senha aleatória
+                    UserModel newUser = new UserModel();
+                    newUser.setEmail(email);
+                    newUser.setName(name);
+                    newUser.setPassword(passwordEncoder.encode(UUID.randomUUID().toString()));
+                    newUser.setRole(Role.USER);
+                    newUser.setAuthProvider(AuthProvider.GOOGLE);
+                    return userRepository.save(newUser);
+                });
     }
 
     public List<UserResponseDTO> getAllUsers() {

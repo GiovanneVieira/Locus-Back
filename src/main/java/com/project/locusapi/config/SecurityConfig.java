@@ -1,6 +1,7 @@
 package com.project.locusapi.config;
 
 import com.project.locusapi.filter.SecurityFilter;
+import com.project.locusapi.handler.CustomOAuth2SuccessHandler;
 import com.project.locusapi.service.AppUserDetailsService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
@@ -40,7 +41,7 @@ public class SecurityConfig {
     }
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain filterChain(HttpSecurity http, CustomOAuth2SuccessHandler customOAuth2SuccessHandler) throws Exception {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
@@ -49,9 +50,8 @@ public class SecurityConfig {
                         .requestMatchers(publicRoutes.toArray(String[]::new)).permitAll()
                         .anyRequest().authenticated()
                 ).sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .oauth2Client(Customizer.withDefaults())
+                .oauth2Login(oauth2 -> oauth2.successHandler(customOAuth2SuccessHandler))
                 .addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class);
-
         return http.build();
     }
 

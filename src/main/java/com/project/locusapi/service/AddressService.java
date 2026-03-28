@@ -7,6 +7,8 @@ import com.project.locusapi.repository.AddressRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class AddressService {
@@ -19,4 +21,9 @@ public class AddressService {
         addressRepository.save(address);
         return addressMapper.toResponseDTO(address);
     }
+
+    public List<AddressResponseDTO> getAllAddress() {
+        return addressRepository.findAll().stream().map(address -> new AddressResponseDTO(address.getCity(), address.getStreet())).toList();
+    }
+    
 }

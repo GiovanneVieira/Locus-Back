@@ -1,10 +1,10 @@
 package com.project.locusapi.service;
 
+import com.project.locusapi.config.JwtPropertiesConfig;
 import com.project.locusapi.model.RefreshToken;
 import com.project.locusapi.model.UserModel;
 import com.project.locusapi.repository.RefreshTokenRepository;
 import jakarta.persistence.EntityNotFoundException;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -15,11 +15,11 @@ public class RefreshTokenService {
 
     private final RefreshTokenRepository refreshTokenRepository;
 
-    @Value("${api.jwt.refresh.expiration}")
-    private Long jwtRefreshExpiration;
+    private final JwtPropertiesConfig jwtPropertiesConfig;
 
-    public RefreshTokenService(RefreshTokenRepository refreshTokenRepository) {
+    public RefreshTokenService(RefreshTokenRepository refreshTokenRepository, JwtPropertiesConfig jwtPropertiesConfig) {
         this.refreshTokenRepository = refreshTokenRepository;
+        this.jwtPropertiesConfig = jwtPropertiesConfig;
     }
 
     public RefreshToken saveRefreshToken(String token, UserModel user) {
@@ -27,7 +27,7 @@ public class RefreshTokenService {
         var refreshToken = RefreshToken.builder()
                 .token(token)
                 .user(user)
-                .expiresAt(Instant.now().plusSeconds(jwtRefreshExpiration))
+                .expiresAt(Instant.now().plusSeconds(jwtPropertiesConfig.getJwtRefreshExpiration()))
                 .build();
         return refreshTokenRepository.save(refreshToken);
     }

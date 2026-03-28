@@ -1,5 +1,6 @@
 package com.project.locusapi.model;
 
+import com.project.locusapi.constant.AuthProvider;
 import com.project.locusapi.constant.Role;
 import jakarta.persistence.*;
 import lombok.*;
@@ -52,6 +53,10 @@ public class UserModel implements UserDetails {
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @Builder.Default
     private List<RefreshToken> refreshToken = new ArrayList<>();
+
+    @Column(name = "auth_provider", updatable = false)
+    @Enumerated(EnumType.STRING)
+    private AuthProvider authProvider;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

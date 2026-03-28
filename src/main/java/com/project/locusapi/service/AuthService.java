@@ -35,35 +35,29 @@ public class AuthService {
     public AuthResultDTO registerUser(@Valid UserRequestDTO userDto) {
         // 1. Cria o usuário no banco (aqui o UserService faz o save)
         userService.createUser(userDto);
-
-        // 2. Chama o método centralizado para autenticar e gerar resposta
-        // O Manager vai buscar o usuário que acabamos de criar direto do banco!
-        return authenticateAndGenerateResponse(userDto.email(), userDto.password());
-    }
-
-    public AuthResultDTO loginUser(@Valid AuthRequestDTO userDto) {
-        return authenticateAndGenerateResponse(userDto.email(), userDto.password());
-    }
-
-    private AuthResultDTO authenticateAndGenerateResponse(String email, String password) {
         var authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(email, password)
+                new UsernamePasswordAuthenticationToken(userDto.email(), userDto.password())
         );
 
-        var user = (UserModel) authentication.getPrincipal();// Gera os tokens
-        assert user != null;
+        var user = (UserModel) authentication.getPrincipal();
 
-        String accessToken = jwtService.generateAccessToken(user);
-        String refreshToken = jwtService.generateRefreshToken(user);
+        return generateAuthResult(user);
+    }
 
-        var savedRefreshToken = refreshTokenService.saveRefreshToken(refreshToken, user);
-        user.addRefreshToken(savedRefreshToken);
+    @Transactional
+    public AuthResultDTO loginUser(@Valid AuthRequestDTO userDto) {
+        var authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(userDto.email(), userDto.password())
+        );
+        return generateAuthResult((UserModel) authentication.getPrincipal());
+    }
 
-        List<ResponseCookie> responseCookies = jwtService.generateCookies(accessToken, refreshToken);
+    @Transactional
+    public AuthResultDTO loginOAuth2User(String email, String name) {
+        UserModel user = userService.getUserByEmail(email)
+                .orElseGet(() -> userService.processOAuthUser(email, name));
 
-        return new AuthResultDTO(
-                new AuthResponseDTO(user.getEmail(), accessToken),
-                responseCookies);
+        return generateAuthResult(user);
     }
 
     @Transactional
@@ -95,7 +89,7 @@ public class AuthService {
         return new AuthResultDTO(new AuthResponseDTO(user.getUsername(), newAccessToken), responseCookies);
     }
 
-
+    @Transactional
     public void logoutUser(String refreshToken, HttpServletResponse response) {
         if (refreshToken != null && !refreshToken.isBlank()) {
             refreshTokenService.deleteByToken(refreshToken);
@@ -108,4 +102,17 @@ public class AuthService {
         response.addHeader(HttpHeaders.SET_COOKIE, cleanRefresh.toString());
     }
 
+    private AuthResultDTO generateAuthResult(UserModel user) {
+        String accessToken = jwtService.generateAccessToken(user);
+        String refreshToken = jwtService.generateRefreshToken(user);
+
+        var savedRefreshToken = refreshTokenService.saveRefreshToken(refreshToken, user);
+        user.addRefreshToken(savedRefreshToken);
+
+        List<ResponseCookie> responseCookies = jwtService.generateCookies(accessToken, refreshToken);
+
+        return new AuthResultDTO(
+                new AuthResponseDTO(user.getEmail(), accessToken),
+                responseCookies);
+    }
 }
