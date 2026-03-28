@@ -14,7 +14,7 @@ public class RouteConfig {
                 "/user/**",
                 "/auth/register",
                 "/auth/login",
-                "/refresh",
+                "/auth/refresh",
                 "/error"
         );
     }

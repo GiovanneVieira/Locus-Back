@@ -79,16 +79,6 @@ public class JwtService {
                 .getClaim("roles").asList(String.class);
     }
 
-
-    public boolean isTokenExpired(String token) {
-        try {
-            DecodedJWT decoded = JWT.decode(token);
-            return decoded.getExpiresAtAsInstant().isBefore(Instant.now());
-        } catch (Exception e) {
-            return true;
-        }
-    }
-
     public ResponseCookie getCleanCookie(String name) {
         return ResponseCookie.from(name, "")
                 .httpOnly(true)
@@ -101,7 +91,7 @@ public class JwtService {
         return ResponseCookie
                 .from(tokenName, tokenValue)
                 .httpOnly(true)
-                .secure(false) // Mude para true em produção
+                .secure(false) // Mudar para true em produção
                 .maxAge(maxAge)
                 .sameSite("Lax")
                 .path("/")

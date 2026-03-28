@@ -49,8 +49,8 @@ public class SecurityConfig {
                         .requestMatchers(publicRoutes.toArray(String[]::new)).permitAll()
                         .anyRequest().authenticated()
                 ).sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .oauth2Client(Customizer.withDefaults())
                 .addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class);
-
 
         return http.build();
     }

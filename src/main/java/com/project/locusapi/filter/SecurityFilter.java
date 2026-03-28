@@ -29,7 +29,6 @@ public class SecurityFilter extends OncePerRequestFilter {
     private final List<String> publicRoutes;
     private final AntPathMatcher pathMatcher = new AntPathMatcher();
 
-    // O "tradutor" de /**
     public SecurityFilter(JwtService jwtService, AppUserDetailsService userDetailsService, @Qualifier("handlerExceptionResolver") HandlerExceptionResolver exceptionResolver, List<String> publicRoutes) {
         this.jwtService = jwtService;
         this.userDetailsService = userDetailsService;
