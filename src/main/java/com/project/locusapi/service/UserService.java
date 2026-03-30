@@ -35,6 +35,7 @@ public class UserService {
         user.setPassword(passwordEncoder.encode(requestDTO.password()));
         user.setRole(Role.USER);
         user.setAuthProvider(AuthProvider.DEFAULT);
+        user.setPfpUrl(null);
         var response = this.userRepository.save(user);
         return this.userMapper.toUserResponseDTO(response);
     }
@@ -48,13 +49,14 @@ public class UserService {
         return userRepository.findByEmail(email);
     }
 
-    public UserModel processOAuthUser(String email, String name) {
+    public UserModel processOAuthUser(String email, String name, String pfpUrl) {
         return userRepository.findByEmail(email)
                 .orElseGet(() -> {
                     // Usuário novo: cria com a senha aleatória
                     UserModel newUser = new UserModel();
                     newUser.setEmail(email);
                     newUser.setName(name);
+                    newUser.setPfpUrl(pfpUrl);
                     newUser.setPassword(passwordEncoder.encode(UUID.randomUUID().toString()));
                     newUser.setRole(Role.USER);
                     newUser.setAuthProvider(AuthProvider.GOOGLE);
