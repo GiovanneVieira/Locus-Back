@@ -1,13 +1,12 @@
 package com.project.locusapi.handler;
 
 import com.project.locusapi.service.AuthService;
-import com.project.locusapi.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
@@ -19,8 +18,9 @@ import java.io.IOException;
 public class CustomOAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
 
     private final AuthService authService;
-    private final UserService userService;
-    private final PasswordEncoder passwordEncoder;
+
+    @Value("${app.frontend.url:http://localhost:5173}")
+    private String frontendUrl;
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
@@ -28,20 +28,16 @@ public class CustomOAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHa
 
         var oAuth2User = (OAuth2User) authentication.getPrincipal();
 
-        // Extraímos os dados que o Google nos deu
         assert oAuth2User != null;
         String email = oAuth2User.getAttribute("email");
-        String name = oAuth2User.getAttribute("name"); // Pegamos o nome também!
+        String name = oAuth2User.getAttribute("name");
 
-        // Chamamos o serviço que agora sabe criar o usuário se ele não existir
         var authResult = authService.loginOAuth2User(email, name);
 
-        // Injetamos os Cookies no Header da resposta
         authResult.cookies().forEach(cookie ->
                 response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString())
         );
 
-        // Redireciona para o Dashboard no React
-        getRedirectStrategy().sendRedirect(request, response, "http://localhost:5173/dashboard");
+        getRedirectStrategy().sendRedirect(request, response, frontendUrl + "/dashboard");
     }
 }
