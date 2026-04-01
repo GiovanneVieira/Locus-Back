@@ -11,7 +11,6 @@ public class RouteConfig {
     @Bean
     public List<String> publicRoutes() {
         return List.of(
-                "/user/**",
                 "/auth/register",
                 "/auth/login",
                 "/auth/refresh",
