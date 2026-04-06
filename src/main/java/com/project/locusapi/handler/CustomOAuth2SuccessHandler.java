@@ -43,6 +43,6 @@ public class CustomOAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHa
         );
 
         // Redireciona para o Dashboard no React
-        getRedirectStrategy().sendRedirect(request, response, "http://localhost:5173/dashboard");
+        getRedirectStrategy().sendRedirect(request, response, "http://localhost:5173");
     }
 }

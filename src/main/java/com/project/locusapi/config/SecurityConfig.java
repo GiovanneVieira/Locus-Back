@@ -3,13 +3,13 @@ package com.project.locusapi.config;
 import com.project.locusapi.filter.SecurityFilter;
 import com.project.locusapi.handler.CustomOAuth2SuccessHandler;
 import com.project.locusapi.service.AppUserDetailsService;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
-import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -45,7 +45,13 @@ public class SecurityConfig {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-                .httpBasic(Customizer.withDefaults())
+                .exceptionHandling(exception -> exception
+                        .authenticationEntryPoint((request, response, authException) -> {
+                            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                            response.setContentType("application/json");
+                            response.getWriter().write("{\"message\": \"Not authorized. Please, log in.\"}");
+                        })
+                )
                 .authorizeHttpRequests((authorize) -> authorize
                         .requestMatchers(publicRoutes.toArray(String[]::new)).permitAll()
                         .anyRequest().authenticated()
