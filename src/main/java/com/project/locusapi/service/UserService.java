@@ -45,6 +45,12 @@ public class UserService {
         return this.userMapper.toUserResponseDTO(user);
     }
 
+    public UserResponseDTO getUserByEmailOrThrow(String email) {
+        var user = this.userRepository.findByEmail(email)
+                .orElseThrow(() -> new EntityNotFoundException("Usuario com email " + email + " nao encontrado"));
+        return this.userMapper.toUserResponseDTO(user);
+    }
+
     public Optional<UserModel> getUserByEmail(String email) {
         return userRepository.findByEmail(email);
     }
@@ -52,7 +58,6 @@ public class UserService {
     public UserModel processOAuthUser(String email, String name, String pfpUrl) {
         return userRepository.findByEmail(email)
                 .orElseGet(() -> {
-                    // Usuário novo: cria com a senha aleatória
                     UserModel newUser = new UserModel();
                     newUser.setEmail(email);
                     newUser.setName(name);
@@ -94,5 +99,3 @@ public class UserService {
         return this.userMapper.toUserResponseDTO(user);
     }
 }
-
-

@@ -8,6 +8,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
@@ -22,6 +23,12 @@ public class UserController {
     public UserController(UserService userService) {
         this.userService = userService;
         this.userMapper = new UserMapper();
+    }
+
+    @GetMapping("/me")
+    public ResponseEntity<?> getCurrentUser(Authentication authentication) {
+        var user = userService.getUserByEmailOrThrow(authentication.getName());
+        return ResponseEntity.status(HttpStatus.OK).body(user);
     }
 
     @PostMapping
@@ -69,5 +76,4 @@ public class UserController {
         var user = userService.deleteUser(id);
         return ResponseEntity.status(HttpStatus.OK).body(user);
     }
-
 }
