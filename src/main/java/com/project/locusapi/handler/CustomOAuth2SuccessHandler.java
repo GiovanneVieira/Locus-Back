@@ -20,7 +20,6 @@ public class CustomOAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHa
 
     private final AuthService authService;
 
-    @Value("${app.frontend.url:http://localhost:5173}")
     private String frontendUrl;
 
     @Override
