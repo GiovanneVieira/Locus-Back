@@ -4,7 +4,7 @@ import com.project.locusapi.service.AuthService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.core.user.OAuth2User;
@@ -15,6 +15,7 @@ import java.io.IOException;
 
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class CustomOAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
 
     private final AuthService authService;
@@ -31,13 +32,15 @@ public class CustomOAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHa
         assert oAuth2User != null;
         String email = oAuth2User.getAttribute("email");
         String name = oAuth2User.getAttribute("name");
-
-        var authResult = authService.loginOAuth2User(email, name);
-
+        String pfpUrl = oAuth2User.getAttribute("picture");
+        // Chamamos o serviço que agora sabe criar o usuário se ele não existir
+        var authResult = authService.loginOAuth2User(email, name, pfpUrl);
+        // Injetamos os Cookies no Header da resposta
         authResult.cookies().forEach(cookie ->
                 response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString())
         );
 
-        getRedirectStrategy().sendRedirect(request, response, frontendUrl + "/dashboard");
+        // Redireciona para o Dashboard no React
+        getRedirectStrategy().sendRedirect(request, response, "http://localhost:5173");
     }
 }

@@ -16,7 +16,14 @@ public class UserMapper {
     }
 
     public UserResponseDTO toUserResponseDTO(UserModel userModel) {
-        return new UserResponseDTO(userModel.getId(), userModel.getName(), userModel.getEmail(), userModel.getRole(), userModel.getCreatedAt(), userModel.getUpdatedAt());
+        return new UserResponseDTO(
+                userModel.getId(),
+                userModel.getName(),
+                userModel.getEmail(),
+                userModel.getRole(),
+                userModel.getCreatedAt(),
+                userModel.getUpdatedAt(),
+                userModel.getPfpUrl());
     }
 
     public UserRequestDTO toUserRequestDTO(UserModel userModel) {
