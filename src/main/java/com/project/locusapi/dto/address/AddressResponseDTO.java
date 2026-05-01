@@ -4,6 +4,6 @@ import com.project.locusapi.model.UserModel;
 
 import java.util.UUID;
 
-public record AddressResponseDTO(UUID id, String addressCity, String addressStreet, String country, String city,
-                                 Integer houseNumber, String street, UUID userId) {
+public record AddressResponseDTO(UUID id, String city, String street, String country, String state,
+                                 Integer houseNumber, String cep, UUID userId) {
 }

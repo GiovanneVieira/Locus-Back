@@ -35,9 +35,9 @@ public class SecurityConfig {
     private final AppUserDetailsService userDetailsService;
     private final SecurityFilter securityFilter;
     private final List<String> publicRoutes;
-    private final Map<HttpMethod, String> hostRoutes;
+    private final Map<HttpMethod, String[]> hostRoutes;
 
-    public SecurityConfig(AppUserDetailsService userDetailsService, SecurityFilter securityFilter, List<String> publicRoutes, Map<HttpMethod, String> hostRoutes) {
+    public SecurityConfig(AppUserDetailsService userDetailsService, SecurityFilter securityFilter, List<String> publicRoutes, Map<HttpMethod, String[]> hostRoutes) {
         this.userDetailsService = userDetailsService;
         this.securityFilter = securityFilter;
         this.publicRoutes = publicRoutes;

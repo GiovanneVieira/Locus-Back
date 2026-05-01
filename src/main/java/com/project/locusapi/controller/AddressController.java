@@ -59,7 +59,7 @@ public class AddressController {
         return ResponseEntity.ok(addresses);
     }
 
-    @PatchMapping("personal")
+    @PatchMapping("/personal")
     public ResponseEntity<AddressResponseDTO> updatePersonalAddress(@RequestParam(name = "addressid") UUID addressId,
                                                                     @RequestBody AddressRequestDTO addressRequestDTO,
                                                                     @AuthenticationPrincipal UserModel authenticatedUser) {
@@ -67,22 +67,22 @@ public class AddressController {
         return ResponseEntity.ok(updatedAddress);
     }
 
-    @PatchMapping("rentable")
+    @PatchMapping("/rentable")
     public ResponseEntity<AddressResponseDTO> updateRentableAddress(@RequestParam(name = "addressid") UUID addressId,
                                                                     @RequestBody AddressRequestDTO addressRequestDTO,
                                                                     @AuthenticationPrincipal UserModel authenticatedUser) {
-        var updatedAddress = addressService.updatePersonalAddress(addressId, authenticatedUser.getId(), addressRequestDTO);
+        var updatedAddress = addressService.updateRentableAddress(addressId, authenticatedUser.getId(), addressRequestDTO);
         return ResponseEntity.ok(updatedAddress);
     }
 
-    @DeleteMapping("personal")
+    @DeleteMapping("/personal")
     public ResponseEntity<AddressResponseDTO> deletePersonalAddress(@RequestParam(name = "addressid") UUID addressId, @AuthenticationPrincipal UserModel authenticatedUser) {
 
         var deletedAddress = addressService.deletePersonalAddress(addressId, authenticatedUser.getId());
         return ResponseEntity.ok(deletedAddress);
     }
 
-    @DeleteMapping("rentable")
+    @DeleteMapping("/rentable")
     public ResponseEntity<AddressResponseDTO> deleteRentableAddress(@RequestParam(name = "addressid") UUID addressId, @AuthenticationPrincipal UserModel authenticatedUser) {
 
         var deletedAddress = addressService.deleteRentableAddress(addressId, authenticatedUser.getId());
