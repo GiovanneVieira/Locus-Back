@@ -5,9 +5,9 @@ import lombok.Getter;
 
 @Getter
 public enum Role {
-    ADMIN("admin"),
-    HOST("host"),
-    USER("user");
+    ADMIN("ROLE_ADMIN"),
+    HOST("ROLE_HOST"),
+    USER("ROLE_USER");
 
     @JsonValue
     private final String roleString;

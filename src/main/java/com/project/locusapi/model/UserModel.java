@@ -80,12 +80,19 @@ public class UserModel implements UserDetails {
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         if (this.role == Role.ADMIN) {
-            return List.of(new SimpleGrantedAuthority("ADMIN"), new SimpleGrantedAuthority("HOST"), new SimpleGrantedAuthority("USER"));
+            return List.of(
+                    new SimpleGrantedAuthority(Role.ADMIN.getRoleString()),
+                    new SimpleGrantedAuthority(Role.HOST.getRoleString()),
+                    new SimpleGrantedAuthority(Role.USER.getRoleString())
+            );
         }
         if (this.role == Role.HOST) {
-            return List.of(new SimpleGrantedAuthority("HOST"), new SimpleGrantedAuthority("USER"));
+            return List.of(
+                    new SimpleGrantedAuthority(Role.HOST.getRoleString()),
+                    new SimpleGrantedAuthority(Role.USER.getRoleString())
+            );
         }
-        return List.of(new SimpleGrantedAuthority("USER"));
+        return List.of(new SimpleGrantedAuthority(Role.USER.getRoleString()));
     }
 
     public void addRefreshToken(RefreshToken token) {
