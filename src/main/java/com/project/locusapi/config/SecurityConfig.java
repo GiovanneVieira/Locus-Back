@@ -7,6 +7,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -22,6 +23,7 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @Configuration
@@ -33,11 +35,13 @@ public class SecurityConfig {
     private final AppUserDetailsService userDetailsService;
     private final SecurityFilter securityFilter;
     private final List<String> publicRoutes;
+    private final Map<HttpMethod, String> hostRoutes;
 
-    public SecurityConfig(AppUserDetailsService userDetailsService, SecurityFilter securityFilter, List<String> publicRoutes) {
+    public SecurityConfig(AppUserDetailsService userDetailsService, SecurityFilter securityFilter, List<String> publicRoutes, Map<HttpMethod, String> hostRoutes) {
         this.userDetailsService = userDetailsService;
         this.securityFilter = securityFilter;
         this.publicRoutes = publicRoutes;
+        this.hostRoutes = hostRoutes;
     }
 
     @Bean
@@ -50,10 +54,14 @@ public class SecurityConfig {
                             response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized");
                         })
                 )
-                .authorizeHttpRequests((authorize) -> authorize
-                        .requestMatchers(publicRoutes.toArray(String[]::new)).permitAll()
-                        .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
-                        .anyRequest().authenticated()
+                .authorizeHttpRequests((authorize) -> {
+                            authorize.requestMatchers(publicRoutes.toArray(String[]::new)).permitAll();
+                            hostRoutes.forEach((method, patterns) ->
+                                    authorize.requestMatchers(method, patterns).hasRole("HOST")
+                            );
+                            authorize.requestMatchers(HttpMethod.GET, "/address/rentable").hasRole("USER");
+                            authorize.anyRequest().authenticated();
+                        }
                 ).sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .oauth2Login(oauth2 -> oauth2.successHandler(customOAuth2SuccessHandler))
                 .addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class);

@@ -1,5 +1,8 @@
 package com.project.locusapi.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.project.locusapi.constant.AuthProvider;
 import com.project.locusapi.constant.Role;
 import jakarta.persistence.*;
@@ -25,8 +28,8 @@ import java.util.UUID;
 public class UserModel implements UserDetails {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    @Column(name = "id", updatable = false, nullable = false)
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(name = "user_id", updatable = false, nullable = false)
     private UUID id;
 
     @Column(name = "name", nullable = false)
@@ -36,6 +39,7 @@ public class UserModel implements UserDetails {
     private String email;
 
     @Column(name = "password", nullable = false)
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String password;
 
     @Column(name = "role", updatable = true)
@@ -53,13 +57,25 @@ public class UserModel implements UserDetails {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private List<RefreshToken> refreshToken = new ArrayList<>();
 
     @Column(name = "auth_provider", updatable = false)
     @Enumerated(EnumType.STRING)
     private AuthProvider authProvider;
+
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "personal_address_id", referencedColumnName = "address_id")
+    @JsonBackReference
+    private PersonalAddressModel personalAddress;
+
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @Builder.Default
+    @JsonBackReference
+    private List<RentableAddressModel> rentableAddress = new ArrayList<>();
+
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -77,7 +93,19 @@ public class UserModel implements UserDetails {
             this.refreshToken = new ArrayList<>();
         }
         this.refreshToken.add(token);
+
+        token.setUser(this);
     }
+
+    public void addRentableAddress(RentableAddressModel rentableAddress) {
+        if (this.rentableAddress == null) {
+            this.rentableAddress = new ArrayList<>();
+        }
+        this.rentableAddress.add(rentableAddress);
+
+        rentableAddress.setUser(this);
+    }
+
 
     @Override
     public String getUsername() {
