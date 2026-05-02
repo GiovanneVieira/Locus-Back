@@ -55,7 +55,22 @@ public class UserService {
         return userRepository.findByEmail(email);
     }
 
-    public UserModel processOAuthUser(String email, String name, String pfpUrl) {
+    public UserModel processOAuthUser(String email, String name, String pfpUrl, String provider) {
+
+        if(provider.equals("facebook")){
+            return userRepository.findByEmail(email)
+                    .orElseGet(() -> {
+                        UserModel newUser = new UserModel();
+                        newUser.setEmail(email);
+                        newUser.setName(name);
+                        newUser.setPfpUrl(pfpUrl);
+                        newUser.setPassword(passwordEncoder.encode(UUID.randomUUID().toString()));
+                        newUser.setRole(Role.USER);
+                        newUser.setAuthProvider(AuthProvider.FACEBOOK);
+                        return userRepository.save(newUser);
+                    });
+        }
+
         return userRepository.findByEmail(email)
                 .orElseGet(() -> {
                     UserModel newUser = new UserModel();

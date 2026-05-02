@@ -53,9 +53,9 @@ public class AuthService {
     }
 
     @Transactional
-    public AuthResultDTO loginOAuth2User(String email, String name, String pfpUrl) {
+    public AuthResultDTO loginOAuth2User(String email, String name, String pfpUrl, String provider) {
         UserModel user = userService.getUserByEmail(email)
-                .orElseGet(() -> userService.processOAuthUser(email, name, pfpUrl));
+                .orElseGet(() -> userService.processOAuthUser(email, name, pfpUrl, provider));
 
         return generateAuthResult(user);
     }

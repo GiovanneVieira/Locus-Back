@@ -1,7 +1,6 @@
 package com.project.locusapi.model;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.project.locusapi.constant.AuthProvider;
 import com.project.locusapi.constant.Role;
@@ -46,7 +45,7 @@ public class UserModel implements UserDetails {
     @Enumerated(EnumType.STRING)
     private Role role;
 
-    @Column(name = "pfpUrl", updatable = true)
+    @Column(name = "pfpUrl", columnDefinition = "TEXT", updatable = true)
     private String pfpUrl;
 
     @CreationTimestamp
