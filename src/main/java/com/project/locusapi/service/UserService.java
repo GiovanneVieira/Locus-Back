@@ -9,6 +9,7 @@ import com.project.locusapi.model.UserModel;
 import com.project.locusapi.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -50,6 +51,13 @@ public class UserService {
                 .orElseThrow(() -> new EntityNotFoundException("Usuario com email " + email + " nao encontrado"));
         return this.userMapper.toUserResponseDTO(user);
     }
+
+    public UserModel getAutenticatedUser(Authentication authentication) {
+        var userEmail =  authentication.getName();
+        return userRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new EntityNotFoundException("User not found"));
+    }
+
 
     public Optional<UserModel> getUserByEmail(String email) {
         return userRepository.findByEmail(email);

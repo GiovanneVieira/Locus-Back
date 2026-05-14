@@ -1,5 +1,6 @@
 package com.project.locusapi.service;
 
+import com.project.locusapi.constant.Role;
 import com.project.locusapi.dto.address.AddressRequestDTO;
 import com.project.locusapi.dto.address.AddressResponseDTO;
 import com.project.locusapi.mapper.address.AddressMapper;
@@ -15,6 +16,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,6 +29,7 @@ public class AddressService {
 
     private final PersonalAddressRepository personalAddressRepository;
     private final RentableAddressRepository rentableAddressRepository;
+    private final UserService userService;
     private final UserRepository userRepository;
     private final AddressMapper addressMapper;
 
@@ -64,11 +67,14 @@ public class AddressService {
         return addressMapper.toResponseDTO(address);
     }
 
-    public List<AddressResponseDTO> getRentableAddressesByUserId(UUID id) {
-        var addresses = rentableAddressRepository.findAllByUserId(id);
+    public List<AddressResponseDTO> getOwnedRentableAddresses(Authentication authentication) {
+        var user = this.userService.getAutenticatedUser(authentication);
+        if(user.getRole().equals(Role.USER)){
+            throw new AccessDeniedException("Insufficient rights to do this operation");
+        }
+        var addresses = rentableAddressRepository.findAllByUserId(user.getId());
         return addresses.stream().map(addressMapper::toResponseDTO).toList();
     }
-
 
     @Transactional(readOnly = true)
     public Page<AddressResponseDTO> getAllRentableAddresses(int page, int size) {
