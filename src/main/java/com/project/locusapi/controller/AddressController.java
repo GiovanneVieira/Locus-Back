@@ -5,7 +5,7 @@ import com.project.locusapi.dto.address.AddressResponseDTO;
 import com.project.locusapi.model.UserModel;
 import com.project.locusapi.service.AddressService;
 import com.project.locusapi.service.UserService;
-import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -42,8 +42,11 @@ public class AddressController {
     }
 
     @GetMapping("/rentable")
-    public ResponseEntity<List<AddressResponseDTO>> getRentableAddresses() {
-        var addresses = addressService.getAllRentableAddresses();
+    public ResponseEntity<?> getRentableAddresses(
+            @RequestParam(name = "page", required = false, defaultValue = "0") Integer page,
+            @RequestParam(name="size", required = false, defaultValue = "12") Integer pageSize
+            ) {
+        var addresses = addressService.getAllRentableAddresses(page, pageSize);
         return ResponseEntity.ok(addresses);
     }
 
@@ -67,26 +70,31 @@ public class AddressController {
         return ResponseEntity.ok(updatedAddress);
     }
 
-    @PatchMapping("/rentable")
-    public ResponseEntity<AddressResponseDTO> updateRentableAddress(@RequestParam(name = "addressid") UUID addressId,
-                                                                    @RequestBody AddressRequestDTO addressRequestDTO,
-                                                                    @AuthenticationPrincipal UserModel authenticatedUser) {
-        var updatedAddress = addressService.updateRentableAddress(addressId, authenticatedUser.getId(), addressRequestDTO);
+    @PatchMapping("/rentable/{id}")
+    public ResponseEntity<AddressResponseDTO> updateRentableAddress(
+            @PathVariable UUID id,
+            @RequestBody @Valid AddressRequestDTO addressRequestDTO,
+            @AuthenticationPrincipal UserModel authenticatedUser) {
+
+        var updatedAddress = addressService.updateRentableAddress(id, authenticatedUser.getId(), addressRequestDTO);
         return ResponseEntity.ok(updatedAddress);
     }
 
-    @DeleteMapping("/personal")
-    public ResponseEntity<AddressResponseDTO> deletePersonalAddress(@RequestParam(name = "addressid") UUID addressId, @AuthenticationPrincipal UserModel authenticatedUser) {
+    @DeleteMapping("/personal/{id}")
+    public ResponseEntity<Void> deletePersonalAddress(
+            @PathVariable UUID id,
+            @AuthenticationPrincipal UserModel authenticatedUser) {
 
-        var deletedAddress = addressService.deletePersonalAddress(addressId, authenticatedUser.getId());
-        return ResponseEntity.ok(deletedAddress);
+        addressService.deletePersonalAddress(id, authenticatedUser.getId());
+        return ResponseEntity.noContent().build(); // 204 No Content é o padrão ideal para Delete bem sucedido
     }
 
     @DeleteMapping("/rentable")
     public ResponseEntity<AddressResponseDTO> deleteRentableAddress(@RequestParam(name = "addressid") UUID addressId, @AuthenticationPrincipal UserModel authenticatedUser) {
 
-        var deletedAddress = addressService.deleteRentableAddress(addressId, authenticatedUser.getId());
-        return ResponseEntity.ok(deletedAddress);
+        addressService.deleteRentableAddress(addressId, authenticatedUser.getId());
+
+        return ResponseEntity.noContent().build();
     }
 }
 

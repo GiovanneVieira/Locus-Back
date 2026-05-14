@@ -23,14 +23,16 @@ public abstract class Address {
     private String state;
     private Integer houseNumber;
     private String cep;
+    private Boolean isRentable;
 
-    public Address(String street, String city, String country, String state, Integer houseNumber, String cep) {
+    public Address(String street, String city, String country, String state, Integer houseNumber, String cep, Boolean isRentable) {
         this.street = street;
         this.city = city;
         this.country = country;
         this.state = state;
         this.houseNumber = houseNumber;
         this.cep = cep;
+        this.isRentable = isRentable;
     }
 
     public Address() {

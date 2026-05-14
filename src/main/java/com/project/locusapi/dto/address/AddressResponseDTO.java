@@ -1,9 +1,25 @@
 package com.project.locusapi.dto.address;
 
-import com.project.locusapi.model.UserModel;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.experimental.SuperBuilder;
 
 import java.util.UUID;
 
-public record AddressResponseDTO(UUID id, String city, String street, String country, String state,
-                                 Integer houseNumber, String cep, UUID userId) {
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
+@SuperBuilder
+public abstract class AddressResponseDTO {
+    private UUID id;
+    private String city;
+    private String street;
+    private String country;
+    private String state;
+    private String houseNumber;
+    private String cep;
+    private Boolean isRentable;
 }

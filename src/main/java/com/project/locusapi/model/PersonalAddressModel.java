@@ -1,6 +1,5 @@
 package com.project.locusapi.model;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.Entity;
 import jakarta.persistence.OneToOne;
@@ -19,9 +18,19 @@ public class PersonalAddressModel extends Address {
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private UserModel user;
 
-    private boolean isRentable = false;
+    private String addressName;
 
-    public PersonalAddressModel(String street, String city, String country, String state, Integer houseNumber, String cep) {
-        super(street, city, country, state, houseNumber, cep);
+
+    public PersonalAddressModel(
+            String street,
+            String city,
+            String country,
+            String state,
+            Integer houseNumber,
+            String cep,
+            String addressName
+    ) {
+        super(street, city, country, state, houseNumber, cep, false);
+        this.addressName = addressName;
     }
 }

@@ -3,6 +3,7 @@ package com.project.locusapi.controller;
 import com.project.locusapi.service.S3Service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -10,6 +11,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.net.URLConnection;
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -27,10 +29,13 @@ public class S3Controller {
 
     @PostMapping("/upload/multiple")
     public ResponseEntity<?> uploadMultiple(@RequestParam("files") MultipartFile[] files) throws IOException {
+        List<String> fileUrls = new ArrayList<>();
         for (MultipartFile file : files) {
             s3Service.uploadFile(file);
+           var fileName = this.s3Service.getUrlFromFileName(file.getOriginalFilename());
+           fileUrls.add(fileName);
         }
-        return ResponseEntity.ok("Files uploaded successfully");
+        return ResponseEntity.status(HttpStatus.OK).body(fileUrls);
     }
 
     @GetMapping("/download")

@@ -11,6 +11,7 @@ import java.util.UUID;
 
 @Repository
 public interface RentableAddressRepository extends JpaRepository<RentableAddressModel, UUID> {
-    @Query("SELECT r FROM rentable_address_table r JOIN FETCH r.user WHERE r.user.id = :id")
-    List<RentableAddressModel> findAllByUserId(@Param("id")UUID userId);
+
+    @Query("SELECT r FROM rentable_address_table r JOIN FETCH r.user WHERE r.user.id = :userId")
+    List<RentableAddressModel> findAllByUserId(@Param("userId") UUID userId);
 }

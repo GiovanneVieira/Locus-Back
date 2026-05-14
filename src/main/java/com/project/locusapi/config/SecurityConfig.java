@@ -1,6 +1,5 @@
 package com.project.locusapi.config;
 
-import com.project.locusapi.constant.Role;
 import com.project.locusapi.filter.SecurityFilter;
 import com.project.locusapi.handler.CustomOAuth2SuccessHandler;
 import com.project.locusapi.service.AppUserDetailsService;
@@ -60,7 +59,7 @@ public class SecurityConfig {
                             hostRoutes.forEach((method, patterns) ->
                                     authorize.requestMatchers(method, patterns).hasRole("HOST")
                             );
-                            authorize.requestMatchers(HttpMethod.GET, "/address/rentable").hasAuthority("USER");
+                            authorize.requestMatchers(HttpMethod.GET, "/address/rentable/**").permitAll();
                             authorize.anyRequest().authenticated();
                         }
                 ).sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

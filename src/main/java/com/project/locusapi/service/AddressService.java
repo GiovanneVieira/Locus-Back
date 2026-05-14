@@ -2,8 +2,7 @@ package com.project.locusapi.service;
 
 import com.project.locusapi.dto.address.AddressRequestDTO;
 import com.project.locusapi.dto.address.AddressResponseDTO;
-import com.project.locusapi.mapper.AddressMapper;
-import com.project.locusapi.model.Address;
+import com.project.locusapi.mapper.address.AddressMapper;
 import com.project.locusapi.model.PersonalAddressModel;
 import com.project.locusapi.model.RentableAddressModel;
 import com.project.locusapi.repository.PersonalAddressRepository;
@@ -11,9 +10,13 @@ import com.project.locusapi.repository.RentableAddressRepository;
 import com.project.locusapi.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;
@@ -28,14 +31,18 @@ public class AddressService {
     private final AddressMapper addressMapper;
 
     public AddressResponseDTO createPersonalAddress(AddressRequestDTO dto, UUID userId) {
-        var address = addressMapper.toModel(dto, PersonalAddressModel.class);
         var user = userRepository.findById(userId).orElseThrow(EntityNotFoundException::new);
+        if (user.getPersonalAddress() != null) {
+            throw new IllegalStateException("User already has a personal address");
+        }
 
+        var address = addressMapper.toModel(dto, PersonalAddressModel.class);
         address.setUser(user);
-        personalAddressRepository.save(address);
 
+        personalAddressRepository.save(address);
         user.setPersonalAddress(address);
         userRepository.save(user);
+
         return addressMapper.toResponseDTO(address);
     }
 
@@ -62,11 +69,15 @@ public class AddressService {
         return addresses.stream().map(addressMapper::toResponseDTO).toList();
     }
 
-    public List<AddressResponseDTO> getAllRentableAddresses() {
-        return rentableAddressRepository.findAll().stream().map(addressMapper::toResponseDTO).toList();
+
+    @Transactional(readOnly = true)
+    public Page<AddressResponseDTO> getAllRentableAddresses(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        var addresses = rentableAddressRepository.findAll(pageable).stream().map(addressMapper::toResponseDTO).toList();
+        return new PageImpl<>(addresses, pageable, addresses.size());
     }
 
-    public AddressResponseDTO deleteRentableAddress(UUID addressId, UUID authenticatedUserId) {
+    public void deleteRentableAddress(UUID addressId, UUID authenticatedUserId) {
         var address = rentableAddressRepository.findById(addressId)
                 .orElseThrow(() -> new EntityNotFoundException("Endereço não encontrado"));
 
@@ -76,10 +87,9 @@ public class AddressService {
         }
 
         rentableAddressRepository.delete(address);
-        return addressMapper.toResponseDTO(address);
     }
 
-    public AddressResponseDTO deletePersonalAddress(UUID addressId, UUID authenticatedUserId) {
+    public void deletePersonalAddress(UUID addressId, UUID authenticatedUserId) {
         var address = personalAddressRepository.findById(addressId)
                 .orElseThrow(() -> new EntityNotFoundException("Endereço não encontrado"));
 
@@ -89,7 +99,6 @@ public class AddressService {
         }
 
         personalAddressRepository.delete(address);
-        return addressMapper.toResponseDTO(address);
     }
 
 
@@ -101,7 +110,8 @@ public class AddressService {
             throw new AccessDeniedException("Você não tem permissão para alterar este endereço");
         }
 
-        safeUpdateAddress(address, dto);
+        addressMapper.updateModel(dto, address);
+
         return addressMapper.toResponseDTO(personalAddressRepository.save(address));
     }
 
@@ -113,31 +123,9 @@ public class AddressService {
             throw new AccessDeniedException("Ação não permitida para este usuário");
         }
 
-        // 3. Sua lógica segura de merge
-        safeUpdateAddress(address, dto);
+        addressMapper.updateModel(dto, address);
 
         return addressMapper.toResponseDTO(rentableAddressRepository.save(address));
     }
 
-
-    private <T extends Address> void safeUpdateAddress(T address, AddressRequestDTO dto) {
-        if (dto.city() != null) {
-            address.setCity(dto.city());
-        }
-        if (dto.country() != null) {
-            address.setCountry(dto.country());
-        }
-        if (dto.cep() != null) {
-            address.setCep(dto.cep());
-        }
-        if (dto.street() != null) {
-            address.setStreet(dto.street());
-        }
-        if (dto.houseNumber() != null) {
-            address.setHouseNumber(dto.houseNumber());
-        }
-        if (dto.state() != null) {
-            address.setState(dto.state());
-        }
-    }
 }
