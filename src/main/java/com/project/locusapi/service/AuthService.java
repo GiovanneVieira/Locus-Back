@@ -30,6 +30,7 @@ public class AuthService {
     private final RefreshTokenService refreshTokenService;
     private final UserMapper userMapper;
     private final UserDetailsService userDetailsService;
+    private final EmailService emailService;
 
     @Transactional // Importante para manter a sessão do banco aberta
     public AuthResultDTO registerUser(@Valid UserRequestDTO userDto) {
@@ -40,7 +41,7 @@ public class AuthService {
         );
 
         var user = (UserModel) authentication.getPrincipal();
-
+        emailService.sendWelcomeEmail(user.getEmail(), "Boas-vindas ao Locus", user.getUsername());
         return generateAuthResult(user);
     }
 
