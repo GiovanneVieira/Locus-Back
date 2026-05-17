@@ -11,6 +11,7 @@ import com.project.locusapi.repository.UserRepository;
 import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -108,6 +109,16 @@ public class UserService {
         user.setUpdatedAt(LocalDateTime.now());
         var response = this.userRepository.save(user);
         return this.userMapper.toUserResponseDTO(response);
+    }
+
+    public UserModel getAuthenticatedUser(Authentication authentication) {
+
+        if(authentication.getPrincipal() instanceof UserModel userModel) {
+            return userModel;
+        }
+
+        var email  = authentication.getName();
+        return this.userRepository.findByEmail(email).orElseThrow(() -> new EntityNotFoundException("User not found"));
     }
 
     public UserResponseDTO enableUser(ActivateUserDTO activateDto) {

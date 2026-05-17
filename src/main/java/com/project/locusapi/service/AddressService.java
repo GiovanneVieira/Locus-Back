@@ -68,7 +68,7 @@ public class AddressService {
     }
 
     public List<AddressResponseDTO> getOwnedRentableAddresses(Authentication authentication) {
-        var user = this.userService.getAutenticatedUser(authentication);
+        var user = this.userService.getAuthenticatedUser(authentication);
         if(user.getRole().equals(Role.USER)){
             throw new AccessDeniedException("Insufficient rights to do this operation");
         }
