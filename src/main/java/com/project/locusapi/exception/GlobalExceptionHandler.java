@@ -2,11 +2,13 @@ package com.project.locusapi.exception;
 
 import com.auth0.jwt.exceptions.*;
 import com.project.locusapi.dto.error.StandardErrorDTO;
+import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.DisabledException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -26,6 +28,41 @@ public class GlobalExceptionHandler {
                 ex.getMessage(),
                 request.getRequestURI());
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorDto);
+    }
+
+    @ExceptionHandler(EntityExistsException.class)
+    public ResponseEntity<StandardErrorDTO> handleEntityExists(EntityExistsException ex, HttpServletRequest request) {
+        StandardErrorDTO errorDto = new StandardErrorDTO(
+                LocalDateTime.now(),
+                HttpStatus.CONFLICT.value(),
+                "Email already exists",
+                ex.getMessage(),
+                request.getRequestURI());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(errorDto);
+    }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<StandardErrorDTO> handleIllegalArgument(IllegalArgumentException ex, HttpServletRequest request) {
+        StandardErrorDTO errorDto = new StandardErrorDTO(
+                LocalDateTime.now(),
+                HttpStatus.BAD_REQUEST.value(),
+                "Invalid argument or business rule violation",
+                ex.getMessage(),
+                request.getRequestURI());
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorDto);
+    }
+
+    @ExceptionHandler(DisabledException.class)
+    public ResponseEntity<StandardErrorDTO> handleDisabled(DisabledException ex, HttpServletRequest request) {
+        StandardErrorDTO errorDto = new StandardErrorDTO(
+                LocalDateTime.now(),
+                HttpStatus.UNAUTHORIZED.value(),
+                "Account Disabled",
+                ex.getMessage(),
+                request.getRequestURI()
+        );
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorDto);
     }
 
     @ExceptionHandler(org.springframework.security.access.AccessDeniedException.class)
