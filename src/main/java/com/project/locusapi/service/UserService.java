@@ -125,6 +125,6 @@ public class UserService {
         this.userRepository.delete(user);
         return this.userMapper.toUserResponseDTO(user);
     }
-
-
+  
+  
 }
