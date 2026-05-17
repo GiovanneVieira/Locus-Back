@@ -1,6 +1,6 @@
 package com.project.locusapi.controller;
 
-import com.project.locusapi.dto.otp.OTPValidationDTO;
+import com.project.locusapi.dto.user.ActivateUserDTO;
 import com.project.locusapi.dto.user.UserRequestDTO;
 import com.project.locusapi.mapper.UserMapper;
 import com.project.locusapi.service.UserService;
@@ -71,9 +71,9 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.OK).body(user);
     }
 
-    @PostMapping("/activate")
-    public ResponseEntity<?> activateUser(@RequestBody @Valid OTPValidationDTO  otpDto) {
-        var user = userService.activateUser(otpDto);
+    @PostMapping("/enable")
+    public ResponseEntity<?> enableUser(@RequestBody @Valid ActivateUserDTO userDto) {
+        var user = userService.enableUser(userDto);
         return ResponseEntity.status(HttpStatus.OK).body(user);
     }
 

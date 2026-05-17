@@ -16,14 +16,14 @@ public class RouteConfig {
                 "/auth/register",
                 "/auth/login",
                 "/auth/refresh",
+                "/user/enable",
                 "/oauth2/**",
                 "/login/oauth2/**",
+                "/otp/**",
                 "/v3/api-docs/**",
                 "/swagger-ui/**",
                 "/swagger-ui.html",
-                "/user/activate",
-                "/error",
-                "/otp/**"
+                "/error"
         );
     }
 

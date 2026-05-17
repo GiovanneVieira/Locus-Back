@@ -2,7 +2,7 @@ package com.project.locusapi.service;
 
 import com.project.locusapi.constant.AuthProvider;
 import com.project.locusapi.constant.Role;
-import com.project.locusapi.dto.otp.OTPValidationDTO;
+import com.project.locusapi.dto.user.ActivateUserDTO;
 import com.project.locusapi.dto.user.UserRequestDTO;
 import com.project.locusapi.dto.user.UserResponseDTO;
 import com.project.locusapi.mapper.UserMapper;
@@ -112,8 +112,8 @@ public class UserService {
         return this.userMapper.toUserResponseDTO(response);
     }
 
-    public UserResponseDTO activateUser(OTPValidationDTO otpDto) {
-        UserModel user = this.getUserByEmail(otpDto.email()).orElseThrow(() -> new EntityNotFoundException("User with email "+ otpDto.email() + " not found"));
+    public UserResponseDTO enableUser(ActivateUserDTO activateDto) {
+        UserModel user = this.getUserByEmail(activateDto.email()).orElseThrow(() -> new EntityNotFoundException("User with email "+ activateDto.email() + " not found"));
         user.setEnabled(true);
         this.userRepository.save(user);
         return userMapper.toUserResponseDTO(user);
