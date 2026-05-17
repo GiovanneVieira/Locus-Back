@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <title>Seu Código de Verificação Locus</title>
+    <style>
+        /* Reset de estilos para e-mails */
+        body, table, td, a { text-size-adjust: 100%; -webkit-text-size-adjust: 100%; }
+        table, td { mso-table-lspace: 0pt; mso-table-rspace: 0pt; }
+        img { -ms-interpolation-mode: bicubic; border: 0; height: auto; line-height: 100%; outline: none; text-decoration: none; }
+        table { border-collapse: collapse !important; }
+        body { height: 100% !important; margin: 0 !important; padding: 0 !important; width: 100% !important; background-color: #0d111a; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #ffffff; }
+
+        /* Estrutura Geral */
+        .wrapper { width: 100%; table-layout: fixed; background-color: #0d111a; padding-bottom: 40px; }
+        .main-table { max-width: 500px; margin: 0 auto; background-color: #121824; border-radius: 16px; border: 1px solid #1e2638; overflow: hidden; }
+
+        /* Tipografia */
+        .hero-title { font-size: 26px; font-weight: 800; line-height: 32px; margin: 0 0 16px 0; color: #ffffff; text-align: center; }
+        .body-text { font-size: 15px; line-height: 24px; color: #94a3b8; margin: 0 0 32px 0; text-align: center; }
+
+        /* Container do Código OTP */
+        .otp-container { background-color: #1a2234; border: 1px solid #24304a; border-radius: 12px; padding: 24px; margin-bottom: 32px; text-align: center; }
+        .otp-code { font-size: 36px; font-weight: 800; letter-spacing: 6px; color: #3a5cf6; margin: 0; font-family: 'Courier New', Courier, monospace; }
+
+        /* Alerta de Segurança */
+        .security-note { font-size: 13px; line-height: 20px; color: #64748b; margin: 0; text-align: center; }
+
+        /* Footer */
+        .footer-text { font-size: 12px; line-height: 18px; color: #475569; text-align: center; }
+
+        /* Responsividade */
+        @media screen and (max-width: 520px) {
+            .main-table { width: 100% !important; border-radius: 0 !important; border-left: none !important; border-right: none !important; }
+            .content-padding { padding: 30px 20px !important; }
+            .otp-code { font-size: 32px !important; letter-spacing: 4px !important; }
+        }
+    </style>
+</head>
+<body>
+<table border="0" cellpadding="0" cellspacing="0" class="wrapper" width="100%">
+    <tr>
+        <td align="center" style="padding-top: 40px;" valign="top">
+            <table border="0" cellpadding="0" cellspacing="0" class="main-table" width="100%">
+                <tr>
+                    <td align="center" style="padding: 40px 40px 20px 40px;" valign="top">
+                        <svg height="44" style="display: block;" viewBox="0 0 120 120" width="44" xmlns="http://www.w3.org/2000/svg">
+                            <rect fill="#3a5cf6" height="120" rx="28" width="120"/>
+                            <path d="M30 22L52 22L52 76L94 76L94 98L30 98Z" fill="#ffffff"/>
+                            <circle cx="92" cy="32" fill="#ffffff" r="11"/>
+                            <circle cx="92" cy="32" fill="#3a5cf6" r="4.5"/>
+                        </svg>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td class="content-padding" style="padding: 20px 40px 40px 40px;">
+                        <h1 class="hero-title">Verifique seu acesso</h1>
+
+                        <p class="body-text">
+                            Olá, <strong th:text="${username}">viajante</strong>. Use o código de verificação abaixo para confirmar sua identidade na plataforma Locus. Este código é válido por 5 minutos.
+                        </p>
+
+                        <div class="otp-container">
+                            <h2 class="otp-code" th:text="${otpCode}">XXXXXX</h2>
+                        </div>
+
+                        <p class="security-note">
+                            Se você não solicitou este código, por favor ignore este e-mail com segurança. Nunca compartilhe este código com ninguém.
+                        </p>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td style="padding: 20px 40px 40px 40px; border-top: 1px solid #1e2638;">
+                        <p class="footer-text">
+                            © 2026 Locus App. Segurança e inteligência em viagens.<br>
+                            Este é um e-mail automático, por favor não o responda.
+                        </p>
+                    </td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+</table>
+</body>
+</html>

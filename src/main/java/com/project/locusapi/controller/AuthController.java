@@ -25,14 +25,15 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<AuthResponseDTO> registerUser(@RequestBody @Valid UserRequestDTO userRequestDTO) {
-        var result = this.authService.registerUser(userRequestDTO);
-        return assembleResponse(result);
+    public ResponseEntity<?> registerUser(@RequestBody @Valid UserRequestDTO userRequestDTO) {
+        var response = this.authService.registerUser(userRequestDTO);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(response);
     }
 
     @PostMapping("/login")
     public ResponseEntity<AuthResponseDTO> login(@RequestBody @Valid AuthRequestDTO userDto) {
-        var result = authService.loginUser(userDto);
+        var result = authService.authenticateUser(userDto);
         return assembleResponse(result);
     }
 

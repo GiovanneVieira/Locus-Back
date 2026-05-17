@@ -56,6 +56,10 @@ public class UserModel implements UserDetails {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
+    @Column(name = "is_enabled", nullable = false)
+    @Builder.Default
+    private Boolean enabled = false;
+
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
@@ -74,7 +78,6 @@ public class UserModel implements UserDetails {
     @Builder.Default
     @JsonBackReference
     private List<RentableAddressModel> rentableAddress = new ArrayList<>();
-
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -112,7 +115,6 @@ public class UserModel implements UserDetails {
         rentableAddress.setUser(this);
     }
 
-
     @Override
     public String getUsername() {
         return this.email;
@@ -135,7 +137,7 @@ public class UserModel implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return UserDetails.super.isEnabled();
+        return this.enabled;
     }
 
 }

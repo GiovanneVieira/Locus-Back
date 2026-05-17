@@ -5,6 +5,7 @@ import com.project.locusapi.dto.auth.AuthRequestDTO;
 import com.project.locusapi.dto.auth.AuthResponseDTO;
 import com.project.locusapi.dto.auth.AuthResultDTO;
 import com.project.locusapi.dto.user.UserRequestDTO;
+import com.project.locusapi.dto.user.UserResponseDTO;
 import com.project.locusapi.mapper.UserMapper;
 import com.project.locusapi.model.UserModel;
 import jakarta.servlet.http.HttpServletResponse;
@@ -21,7 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 @Service
-@RequiredArgsConstructor // Use o Lombok para gerar o construtor com final
+@RequiredArgsConstructor
 public class AuthService {
 
     private final UserService userService;
@@ -30,22 +31,15 @@ public class AuthService {
     private final RefreshTokenService refreshTokenService;
     private final UserMapper userMapper;
     private final UserDetailsService userDetailsService;
+    private final EmailService emailService;
+    private final OTPService otpService;
 
-    @Transactional // Importante para manter a sessão do banco aberta
-    public AuthResultDTO registerUser(@Valid UserRequestDTO userDto) {
-        // 1. Cria o usuário no banco (aqui o UserService faz o save)
-        userService.createUser(userDto);
-        var authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(userDto.email(), userDto.password())
-        );
-
-        var user = (UserModel) authentication.getPrincipal();
-
-        return generateAuthResult(user);
+    public UserResponseDTO registerUser(@Valid UserRequestDTO userDto) {
+        return userService.createUser(userDto);
     }
 
     @Transactional
-    public AuthResultDTO loginUser(@Valid AuthRequestDTO userDto) {
+    public AuthResultDTO authenticateUser(@Valid AuthRequestDTO userDto) {
         var authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(userDto.email(), userDto.password())
         );
@@ -102,7 +96,8 @@ public class AuthService {
         response.addHeader(HttpHeaders.SET_COOKIE, cleanRefresh.toString());
     }
 
-    private AuthResultDTO generateAuthResult(UserModel user) {
+    public AuthResultDTO generateAuthResult(UserModel user) {
+
         String accessToken = jwtService.generateAccessToken(user);
         String refreshToken = jwtService.generateRefreshToken(user);
 
@@ -115,4 +110,5 @@ public class AuthService {
                 new AuthResponseDTO(user.getEmail(), accessToken),
                 responseCookies);
     }
+
 }

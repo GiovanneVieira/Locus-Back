@@ -1,5 +1,6 @@
 package com.project.locusapi.controller;
 
+import com.project.locusapi.dto.user.ActivateUserDTO;
 import com.project.locusapi.dto.user.UserRequestDTO;
 import com.project.locusapi.mapper.UserMapper;
 import com.project.locusapi.service.UserService;
@@ -19,9 +20,9 @@ public class UserController {
     private final UserService userService;
     private final UserMapper userMapper;
 
-    public UserController(UserService userService) {
+    public UserController(UserService userService, UserMapper userMapper) {
         this.userService = userService;
-        this.userMapper = new UserMapper();
+        this.userMapper = userMapper;
     }
 
     @PostMapping
@@ -69,4 +70,11 @@ public class UserController {
         var user = userService.deleteUser(id);
         return ResponseEntity.status(HttpStatus.OK).body(user);
     }
+
+    @PostMapping("/enable")
+    public ResponseEntity<?> enableUser(@RequestBody @Valid ActivateUserDTO userDto) {
+        var user = userService.enableUser(userDto);
+        return ResponseEntity.status(HttpStatus.OK).body(user);
+    }
+
 }
