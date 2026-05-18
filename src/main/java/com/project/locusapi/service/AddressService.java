@@ -61,6 +61,11 @@ public class AddressService {
         return addressMapper.toResponseDTO(address);
     }
 
+    public AddressResponseDTO getRentableAddressById(UUID addressId){
+        var address = rentableAddressRepository.findById(addressId).orElseThrow(EntityNotFoundException::new);
+        return addressMapper.toResponseDTO(address);
+    }
+
 
     public AddressResponseDTO getPersonalAddressByUserId(UUID id) {
         var address = personalAddressRepository.findByUserId(id).orElseThrow(() -> new EntityNotFoundException("Personal address from user with id " + id + "not found"));

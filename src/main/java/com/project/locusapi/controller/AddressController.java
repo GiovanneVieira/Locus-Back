@@ -63,6 +63,12 @@ public class AddressController {
         return ResponseEntity.ok(addresses);
     }
 
+    @GetMapping("/rentable/{id}")
+    public ResponseEntity<AddressResponseDTO> getRentableAddressById(@PathVariable UUID id) {
+        var address = addressService.getRentableAddressById(id);
+        return ResponseEntity.ok(address);
+    }
+
     @PatchMapping("/personal")
     public ResponseEntity<AddressResponseDTO> updatePersonalAddress(@RequestParam(name = "addressid") UUID addressId,
                                                                     @RequestBody AddressRequestDTO addressRequestDTO,

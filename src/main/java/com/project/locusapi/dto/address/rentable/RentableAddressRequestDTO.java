@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.List;
 
 @Getter
@@ -41,8 +41,8 @@ public class RentableAddressRequestDTO extends AddressRequestDTO {
     private List<String> amenities;
 
     @NotNull(message = "A data de disponibilidade inicial é obrigatória")
-    private LocalDateTime availableFrom;
+    private LocalDate availableFrom;
 
     @NotNull(message = "A data de disponibilidade final é obrigatória")
-    private LocalDateTime availableTo;
+    private LocalDate availableTo;
 }

@@ -8,6 +8,7 @@ import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -40,8 +41,8 @@ public class RentableAddressModel extends Address {
     @CollectionTable(name = "address_amenities", joinColumns = @JoinColumn(name = "address_id"))
     private List<String> amenities = new ArrayList<>();
 
-    private LocalDateTime availableFrom;
-    private LocalDateTime availableTo;
+    private LocalDate availableFrom;
+    private LocalDate availableTo;
 
     @OneToMany(fetch = FetchType.LAZY)
     private List<Rental> rentals;
@@ -64,8 +65,8 @@ public class RentableAddressModel extends Address {
             String complement,
             Integer pricePerNight,
             Integer maxGuests,
-            LocalDateTime availableFrom,
-            LocalDateTime availableTo) {
+            LocalDate availableFrom,
+            LocalDate availableTo) {
         super(street, city, country, state, integer, cep, true);
         this.imageUrls = new ArrayList<>();
         this.rentals = new ArrayList<>();

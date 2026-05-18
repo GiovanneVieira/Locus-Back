@@ -7,7 +7,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.List;
 
 @Getter
@@ -22,8 +22,8 @@ public class RentableAddressResponseDTO extends AddressResponseDTO {
     private Integer maxGuests;
     private List<String> imageUrls;
     private List<String> amenities;
-    private LocalDateTime availableFrom;
-    private LocalDateTime availableTo;
+    private LocalDate availableFrom;
+    private LocalDate availableTo;
     private List<Rental> rentals;
 
 
