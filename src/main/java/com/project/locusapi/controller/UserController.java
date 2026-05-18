@@ -9,6 +9,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
@@ -75,6 +76,12 @@ public class UserController {
     public ResponseEntity<?> enableUser(@RequestBody @Valid ActivateUserDTO userDto) {
         var user = userService.enableUser(userDto);
         return ResponseEntity.status(HttpStatus.OK).body(user);
+    }
+
+    @PatchMapping("/become-host")
+    public ResponseEntity<?> becomeHost(Authentication authentication) {
+        var response = this.userService.setUserToHost(authentication);
+        return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
 }

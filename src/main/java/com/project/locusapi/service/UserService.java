@@ -128,6 +128,18 @@ public class UserService {
         return userMapper.toUserResponseDTO(user);
     }
 
+    public UserResponseDTO setUserToHost(Authentication authentication) {
+        var email = authentication.getName();
+        if(email==null){
+            throw new EntityNotFoundException("User not found");
+        }
+        var user = this.getUserByEmail(email).orElseThrow(() -> new EntityNotFoundException("User not found"));
+        user.setRole(Role.HOST);
+        user.setUpdatedAt(LocalDateTime.now());
+        this.userRepository.save(user);
+        return userMapper.toUserResponseDTO(user);
+    }
+
 
     public UserResponseDTO deleteUser(UUID id) {
         var user = this.userRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Usuario com id " + id + " nao encontrado"));
