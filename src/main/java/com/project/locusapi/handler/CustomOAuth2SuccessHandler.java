@@ -1,5 +1,6 @@
 package com.project.locusapi.handler;
 
+import com.project.locusapi.handler.OAuth2.OAuth2UserExtractor;
 import com.project.locusapi.service.AuthService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -13,7 +14,7 @@ import org.springframework.security.web.authentication.SimpleUrlAuthenticationSu
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-import java.util.logging.Logger;
+import java.util.List;
 
 @Component
 @RequiredArgsConstructor
@@ -21,7 +22,7 @@ import java.util.logging.Logger;
 public class CustomOAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
 
     private final AuthService authService;
-    private final Logger logger = Logger.getLogger(CustomOAuth2SuccessHandler.class.getName());
+    private final List<OAuth2UserExtractor> extractors;
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
@@ -33,18 +34,13 @@ public class CustomOAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHa
 
         String email = oAuth2User.getAttribute("email");
         String name = oAuth2User.getAttribute("name");
-        String pfpUrl = null;
-        if(provider.equals("facebook")){
-            Object pictureObj = oAuth2User.getAttribute("picture");
-            if (pictureObj instanceof java.util.Map<?, ?> pictureMap) {
-                var dataMap = (java.util.Map<?, ?>) pictureMap.get("data");
-                if (dataMap != null) {
-                    pfpUrl = (String) dataMap.get("url");
-                }
-            }
-        }else if(provider.equals("google")){
-            pfpUrl = oAuth2User.getAttribute("pfpUrl");
-        }
+
+        // Encontra o extrator correto dinamicamente (OCP respeitado)
+        String pfpUrl = extractors.stream()
+                .filter(e -> e.supports(provider))
+                .findFirst()
+                .map(e -> e.extractProfilePicture(oAuth2User))
+                .orElse(null);
 
         var authResult = authService.loginOAuth2User(email, name, pfpUrl, provider);
 

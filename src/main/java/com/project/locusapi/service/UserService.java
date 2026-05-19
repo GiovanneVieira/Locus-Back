@@ -5,11 +5,11 @@ import com.project.locusapi.constant.Role;
 import com.project.locusapi.dto.user.ActivateUserDTO;
 import com.project.locusapi.dto.user.UserRequestDTO;
 import com.project.locusapi.dto.user.UserResponseDTO;
+import com.project.locusapi.exception.business.EmailAlreadyExistsException;
+import com.project.locusapi.exception.business.UserNotFoundException;
 import com.project.locusapi.mapper.UserMapper;
 import com.project.locusapi.model.UserModel;
 import com.project.locusapi.repository.UserRepository;
-import jakarta.persistence.EntityExistsException;
-import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -34,10 +34,9 @@ public class UserService {
     }
 
     public UserResponseDTO createUser(@Valid UserRequestDTO requestDTO) {
-
         var existingUser = this.getUserByEmail(requestDTO.email());
-        if(existingUser.isPresent()) {
-            throw new EntityExistsException("User with email " + requestDTO.email() + " already exists");
+        if (existingUser.isPresent()) {
+            throw new EmailAlreadyExistsException(requestDTO.email());
         }
 
         var newUser = this.userMapper.toUserModel(requestDTO);
@@ -50,7 +49,8 @@ public class UserService {
     }
 
     public UserResponseDTO getUserById(UUID id) {
-        var user = this.userRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Usuario com id " + id + " nao encontrado"));
+        var user = this.userRepository.findById(id)
+                .orElseThrow(() -> new UserNotFoundException(id));
         return this.userMapper.toUserResponseDTO(user);
     }
 
@@ -58,21 +58,12 @@ public class UserService {
         return userRepository.findByEmail(email);
     }
 
-    public UserModel processOAuthUser(String email, String name, String pfpUrl, String provider) {
+    public UserModel saveUser(UserModel user) {
+        return this.userRepository.save(user);
+    }
 
-        if(provider.equals("facebook")){
-            return getUserByEmail(email)
-                    .orElseGet(() -> {
-                        UserModel newUser = new UserModel();
-                        newUser.setEmail(email);
-                        newUser.setName(name);
-                        newUser.setPfpUrl(pfpUrl);
-                        newUser.setPassword(passwordEncoder.encode(UUID.randomUUID().toString()));
-                        newUser.setRole(Role.USER);
-                        newUser.setAuthProvider(AuthProvider.FACEBOOK);
-                        return userRepository.save(newUser);
-                    });
-        }
+    public UserModel processOAuthUser(String email, String name, String pfpUrl, String provider) {
+        AuthProvider authProvider = provider.equals("facebook") ? AuthProvider.FACEBOOK : AuthProvider.GOOGLE;
 
         return getUserByEmail(email)
                 .orElseGet(() -> {
@@ -82,7 +73,7 @@ public class UserService {
                     newUser.setPfpUrl(pfpUrl);
                     newUser.setPassword(passwordEncoder.encode(UUID.randomUUID().toString()));
                     newUser.setRole(Role.USER);
-                    newUser.setAuthProvider(AuthProvider.GOOGLE);
+                    newUser.setAuthProvider(authProvider);
                     return userRepository.save(newUser);
                 });
     }
@@ -90,13 +81,15 @@ public class UserService {
     public List<UserResponseDTO> getAllUsers() {
         var users = this.userRepository.findAll();
         if (users.isEmpty()) {
-            throw new EntityNotFoundException("Nenhum usuario encontrado");
+            throw new UserNotFoundException("Nenhum usuário encontrado cadastrado no sistema.");
         }
         return users.stream().map(this.userMapper::toUserResponseDTO).toList();
     }
 
     public UserResponseDTO updateUserById(UUID id, UserRequestDTO requestDTO) {
-        var user = this.userRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Usuario com id " + id + " nao encontrado"));
+        var user = this.userRepository.findById(id)
+                .orElseThrow(() -> new UserNotFoundException(id));
+
         if (requestDTO.name() != null) {
             user.setName(requestDTO.name());
         }
@@ -112,17 +105,18 @@ public class UserService {
     }
 
     public UserModel getAuthenticatedUser(Authentication authentication) {
-
-        if(authentication.getPrincipal() instanceof UserModel userModel) {
+        if (authentication.getPrincipal() instanceof UserModel userModel) {
             return userModel;
         }
 
-        var email  = authentication.getName();
-        return this.userRepository.findByEmail(email).orElseThrow(() -> new EntityNotFoundException("User not found"));
+        var email = authentication.getName();
+        return this.userRepository.findByEmail(email)
+                .orElseThrow(() -> new UserNotFoundException("Usuário autenticado não encontrado."));
     }
 
     public UserResponseDTO enableUser(ActivateUserDTO activateDto) {
-        UserModel user = this.getUserByEmail(activateDto.email()).orElseThrow(() -> new EntityNotFoundException("User with email "+ activateDto.email() + " not found"));
+        UserModel user = this.getUserByEmail(activateDto.email())
+                .orElseThrow(() -> new UserNotFoundException(activateDto.email()));
         user.setEnabled(true);
         this.userRepository.save(user);
         return userMapper.toUserResponseDTO(user);
@@ -130,22 +124,22 @@ public class UserService {
 
     public UserResponseDTO setUserToHost(Authentication authentication) {
         var email = authentication.getName();
-        if(email==null){
-            throw new EntityNotFoundException("User not found");
+        if (email == null) {
+            throw new UserNotFoundException();
         }
-        var user = this.getUserByEmail(email).orElseThrow(() -> new EntityNotFoundException("User not found"));
+        var user = this.getUserByEmail(email)
+                .orElseThrow(() -> new UserNotFoundException(email));
+
         user.setRole(Role.HOST);
         user.setUpdatedAt(LocalDateTime.now());
         this.userRepository.save(user);
         return userMapper.toUserResponseDTO(user);
     }
 
-
     public UserResponseDTO deleteUser(UUID id) {
-        var user = this.userRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Usuario com id " + id + " nao encontrado"));
+        var user = this.userRepository.findById(id)
+                .orElseThrow(() -> new UserNotFoundException(id));
         this.userRepository.delete(user);
         return this.userMapper.toUserResponseDTO(user);
     }
-  
-  
 }

@@ -12,6 +12,7 @@ import lombok.experimental.SuperBuilder;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.UUID;
 
 @Getter
 @Setter
@@ -35,9 +36,6 @@ public class RentableAddressRequestDTO extends AddressRequestDTO {
     @Min(value = 1, message = "Deve aceitar pelo menos 1 hóspede")
     private Integer maxGuests;
 
-    @NotEmpty(message = "Adicione pelo menos uma imagem")
-    private List<String> imageUrls;
-
     private List<String> amenities;
 
     @NotNull(message = "A data de disponibilidade inicial é obrigatória")
@@ -45,4 +43,10 @@ public class RentableAddressRequestDTO extends AddressRequestDTO {
 
     @NotNull(message = "A data de disponibilidade final é obrigatória")
     private LocalDate availableTo;
+
+    @NotEmpty(message = "Associe pelo menos uma imagem previamente enviada ao anúncio")
+    private List<UUID> imageIds;
+
+    @NotNull(message = "Defina qual imagem será a principal (capa) do anúncio")
+    private UUID mainImageId;
 }

@@ -4,15 +4,17 @@ import com.project.locusapi.dto.auth.AuthRequestDTO;
 import com.project.locusapi.dto.auth.AuthResponseDTO;
 import com.project.locusapi.dto.auth.AuthResultDTO;
 import com.project.locusapi.dto.user.UserRequestDTO;
+import com.project.locusapi.dto.user.UserResponseDTO;
 import com.project.locusapi.service.AuthService;
-import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Collections;
+import java.util.List;
 
 @RestController
 @RequestMapping("/auth")
@@ -25,7 +27,7 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<?> registerUser(@RequestBody @Valid UserRequestDTO userRequestDTO) {
+    public ResponseEntity<UserResponseDTO> registerUser(@RequestBody @Valid UserRequestDTO userRequestDTO) {
         var response = this.authService.registerUser(userRequestDTO);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(response);
@@ -33,8 +35,13 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<AuthResponseDTO> login(@RequestBody @Valid AuthRequestDTO userDto) {
-        var result = authService.authenticateUser(userDto);
-        return assembleResponse(result);
+        // 1. O serviço devolve o AuthResultDTO completo (com os cookies e o DTO de resposta)
+        AuthResultDTO result = authService.authenticateUser(userDto);
+
+        // 2. Passamos a lista de cookies extraída do Record para o helper
+        // 3. Definimos o corpo da resposta com o AuthResponseDTO contido no Record
+        return prepareResponseWithCookies(result.cookies())
+                .body(result.responseDTO());
     }
 
     @PostMapping("/refresh")
@@ -42,29 +49,34 @@ public class AuthController {
         if (refreshToken == null || refreshToken.isBlank()) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
-        var result = authService.refreshToken(refreshToken);
-        return assembleResponse(result);
+
+        // Da mesma forma que no login, o refresh obtém o AuthResultDTO completo
+        AuthResultDTO result = authService.refreshToken(refreshToken);
+
+        return prepareResponseWithCookies(result.cookies())
+                .body(result.responseDTO());
     }
 
     @PostMapping("/logout")
     public ResponseEntity<?> logout(
-            @CookieValue(name = "refreshToken", required = false) String refreshToken,
-            HttpServletResponse response) {
+            @CookieValue(name = "refreshToken", required = false) String refreshToken) {
 
-        authService.logoutUser(refreshToken, response);
-        return ResponseEntity.ok(Collections.singletonMap("message", "Logout realizado com sucesso"));
+        // O logout não precisa do AuthResultDTO porque não há corpo de resposta com e-mail/token.
+        // Ele precisa apenas da lista de cookies de limpeza.
+        List<ResponseCookie> cleanCookies = authService.logoutUser(refreshToken);
+
+        return prepareResponseWithCookies(cleanCookies)
+                .body(Collections.singletonMap("message", "Logout realizado com sucesso"));
     }
 
-    // Helper privado para não repetir a lógica de adicionar cookies no Header
-    private ResponseEntity<AuthResponseDTO> assembleResponse(AuthResultDTO result) {
+    // HELPER ÚNICO: Centraliza a inserção de cookies no cabeçalho HTTP Set-Cookie
+    private ResponseEntity.BodyBuilder prepareResponseWithCookies(List<ResponseCookie> cookies) {
         var responseBuilder = ResponseEntity.ok();
 
-        // Adiciona cada cookie da lista (Access e Refresh) no cabeçalho Set-Cookie
-        result.cookies().forEach(cookie ->
+        cookies.forEach(cookie ->
                 responseBuilder.header(HttpHeaders.SET_COOKIE, cookie.toString())
         );
 
-        return responseBuilder.body(result.responseDTO());
+        return responseBuilder;
     }
 }
-

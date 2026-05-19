@@ -1,5 +1,6 @@
 package com.project.locusapi.dto.address;
 
+import com.project.locusapi.domain.CEP;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -20,6 +21,6 @@ public abstract class AddressResponseDTO {
     private String country;
     private String state;
     private String houseNumber;
-    private String cep;
+    private CEP cep;
     private Boolean isRentable;
 }

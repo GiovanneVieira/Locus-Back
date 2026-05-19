@@ -1,6 +1,7 @@
 package com.project.locusapi.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.project.locusapi.domain.CEP;
 import jakarta.persistence.Entity;
 import jakarta.persistence.OneToOne;
 import lombok.Getter;
@@ -27,10 +28,10 @@ public class PersonalAddressModel extends Address {
             String country,
             String state,
             Integer houseNumber,
-            String cep,
+            CEP cep,
             String addressName
     ) {
-        super(street, city, country, state, houseNumber, cep, false);
+        super(street, city, country, state, houseNumber, cep);
         this.addressName = addressName;
     }
 }

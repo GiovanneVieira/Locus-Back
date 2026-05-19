@@ -25,17 +25,15 @@ public class RentableAddressTypeMapper extends BaseAddressTypeMapper<RentableAdd
     public RentableAddressModel toModel(RentableAddressRequestDTO dto) {
         if (dto == null) return null;
 
-        // Criando a instância usando o construtor super/base (ajustado para os campos comuns)
         RentableAddressModel model = new RentableAddressModel();
 
-        // Campos herdados de Address (via setters ou lógica comum)
+        // Campos herdados de Address
         model.setStreet(dto.getStreet());
         model.setCity(dto.getCity());
         model.setCountry(dto.getCountry());
         model.setState(dto.getState());
         model.setHouseNumber(dto.getHouseNumber());
-        model.setCep(dto.getCep());
-        model.setIsRentable(true);
+        model.setCep(dto.getCep()); // Funciona nativamente via mapeamento de tipo CEP -> CEP
 
         // Campos específicos de RentableAddressModel
         model.setTitle(dto.getTitle());
@@ -45,11 +43,6 @@ public class RentableAddressTypeMapper extends BaseAddressTypeMapper<RentableAdd
         model.setMaxGuests(dto.getMaxGuests());
         model.setAvailableFrom(dto.getAvailableFrom());
         model.setAvailableTo(dto.getAvailableTo());
-
-        // Tratamento de Listas para evitar NullPointerException e manter encapsulamento
-        if (dto.getImageUrls() != null) {
-            model.setImageUrls(new ArrayList<>(dto.getImageUrls()));
-        }
 
         if (dto.getAmenities() != null) {
             model.setAmenities(new ArrayList<>(dto.getAmenities()));
@@ -72,7 +65,7 @@ public class RentableAddressTypeMapper extends BaseAddressTypeMapper<RentableAdd
                 .complement(model.getComplement())
                 .pricePerNight(model.getPricePerNight())
                 .maxGuests(model.getMaxGuests())
-                .imageUrls(model.getImageUrls())
+                .images(model.getImages())
                 .amenities(model.getAmenities())
                 .availableFrom(model.getAvailableFrom())
                 .availableTo(model.getAvailableTo());
@@ -82,13 +75,12 @@ public class RentableAddressTypeMapper extends BaseAddressTypeMapper<RentableAdd
 
     @Override
     public void update(RentableAddressRequestDTO dto, RentableAddressModel model) {
-        updateCommonFields(dto, model); // Atualiza base
+        updateCommonFields(dto, model); // Atualiza base comum de endereços
 
         if (dto.getTitle() != null) model.setTitle(dto.getTitle());
         if (dto.getDescription() != null) model.setDescription(dto.getDescription());
         if (dto.getPricePerNight() != null) model.setPricePerNight(dto.getPricePerNight());
         if (dto.getMaxGuests() != null) model.setMaxGuests(dto.getMaxGuests());
-        if (dto.getImageUrls() != null) model.setImageUrls(new ArrayList<>(dto.getImageUrls()));
         if (dto.getAmenities() != null) model.setAmenities(new ArrayList<>(dto.getAmenities()));
         if (dto.getAvailableFrom() != null) model.setAvailableFrom(dto.getAvailableFrom());
         if (dto.getAvailableTo() != null) model.setAvailableTo(dto.getAvailableTo());

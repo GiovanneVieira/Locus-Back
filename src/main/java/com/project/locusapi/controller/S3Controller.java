@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -36,20 +35,6 @@ public class S3Controller {
            fileUrls.add(fileName);
         }
         return ResponseEntity.status(HttpStatus.OK).body(fileUrls);
-    }
-
-    @GetMapping("/download")
-    public ResponseEntity<byte[]> download(@RequestParam("fileName") String fileName) throws IOException {
-        byte[] data = s3Service.downloadFile(fileName);
-
-        // Tenta determinar o tipo de mídia (ou use um padrão)
-        String contentType = URLConnection.guessContentTypeFromName(fileName);
-        if (contentType == null) contentType = "application/octet-stream";
-
-        return ResponseEntity.ok()
-                .contentType(MediaType.parseMediaType(contentType))
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + fileName + "\"")
-                .body(data);
     }
 
     @GetMapping("/download/multiple")

@@ -8,10 +8,8 @@ import com.project.locusapi.dto.user.UserRequestDTO;
 import com.project.locusapi.dto.user.UserResponseDTO;
 import com.project.locusapi.mapper.UserMapper;
 import com.project.locusapi.model.UserModel;
-import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -50,7 +48,8 @@ public class AuthService {
     public AuthResultDTO loginOAuth2User(String email, String name, String pfpUrl, String provider) {
         UserModel user = userService.getUserByEmail(email)
                 .orElseGet(() -> userService.processOAuthUser(email, name, pfpUrl, provider));
-
+        user.setEnabled(true);
+        userService.saveUser(user);
         return generateAuthResult(user);
     }
 
@@ -84,16 +83,16 @@ public class AuthService {
     }
 
     @Transactional
-    public void logoutUser(String refreshToken, HttpServletResponse response) {
+    public List<ResponseCookie> logoutUser(String refreshToken) {
         if (refreshToken != null && !refreshToken.isBlank()) {
             refreshTokenService.deleteByToken(refreshToken);
         }
 
+        // O serviço apenas gera os objetos de cookies limpos
         ResponseCookie cleanAccess = jwtService.getCleanCookie("accessToken");
         ResponseCookie cleanRefresh = jwtService.getCleanCookie("refreshToken");
 
-        response.addHeader(HttpHeaders.SET_COOKIE, cleanAccess.toString());
-        response.addHeader(HttpHeaders.SET_COOKIE, cleanRefresh.toString());
+        return List.of(cleanAccess, cleanRefresh);
     }
 
     public AuthResultDTO generateAuthResult(UserModel user) {

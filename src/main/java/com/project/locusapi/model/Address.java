@@ -1,7 +1,10 @@
 package com.project.locusapi.model;
 
+import com.project.locusapi.domain.CEP;
+import com.project.locusapi.mapper.converter.CepConverter;
 import jakarta.persistence.*;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.UUID;
@@ -9,6 +12,7 @@ import java.util.UUID;
 @Getter
 @Setter
 @Entity
+@NoArgsConstructor // Lombok gera o construtor padrão vazio exigido pelo JPA
 @Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
 public abstract class Address {
 
@@ -17,25 +21,33 @@ public abstract class Address {
     @Column(name = "address_id")
     private UUID id;
 
+    @Column(nullable = false)
     private String street;
-    private String city;
-    private String country;
-    private String state;
-    private Integer houseNumber;
-    private String cep;
-    private Boolean isRentable;
 
-    public Address(String street, String city, String country, String state, Integer houseNumber, String cep, Boolean isRentable) {
+    @Column(nullable = false)
+    private String city;
+
+    @Column(nullable = false)
+    private String country;
+
+    @Column(nullable = false)
+    private String state;
+
+    @Column(name = "house_number", nullable = false)
+    private Integer houseNumber;
+
+    // O CepConverter com autoApply=true interceptará esse tipo automaticamente
+    @Column(name = "cep_code", length = 8, nullable = false)
+    @Convert(converter = CepConverter.class)
+    private CEP cep;
+
+
+    public Address(String street, String city, String country, String state, Integer houseNumber, CEP cep) {
         this.street = street;
         this.city = city;
         this.country = country;
         this.state = state;
         this.houseNumber = houseNumber;
         this.cep = cep;
-        this.isRentable = isRentable;
-    }
-
-    public Address() {
-
     }
 }
