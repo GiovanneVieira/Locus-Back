@@ -139,6 +139,11 @@ public class RentableAddressImageService {
     // MÉTODOS CONVENIENTES DE BUSCA ESPECÍFICA
     // ==========================================
 
+    @Transactional
+    public List<RentableAddressImage> getAllImagesByIds(List<UUID> imageIds) {
+        return imageRepository.findAllById(imageIds);
+    }
+
     @Transactional(readOnly = true)
     public List<RentableAddressImage> getImagesByAddress(UUID addressId) {
         return imageRepository.findByAddressId(addressId);

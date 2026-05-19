@@ -1,5 +1,6 @@
 package com.project.locusapi.domain;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 
 public record CEP(String value) {
@@ -7,6 +8,8 @@ public record CEP(String value) {
     private static final String REGEX_CEP = "\\d{5}-\\d{3}";
     private static final String REGEX_CLEAN = "\\d{8}";
 
+    // 🔄 CORREÇÃO: Diz ao Jackson para delegar a String vinda do JSON direto para este construtor
+    @JsonCreator(mode = JsonCreator.Mode.DELEGATING)
     public CEP {
         if (value == null) {
             throw new IllegalArgumentException("CEP não pode ser nulo.");

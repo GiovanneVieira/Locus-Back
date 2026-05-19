@@ -1,5 +1,6 @@
 package com.project.locusapi.mapper.address;
 
+import com.project.locusapi.dto.address.rentable.RentableAddressImageResponseDTO;
 import com.project.locusapi.dto.address.rentable.RentableAddressRequestDTO;
 import com.project.locusapi.dto.address.rentable.RentableAddressResponseDTO;
 import com.project.locusapi.model.Address;
@@ -63,10 +64,19 @@ public class RentableAddressTypeMapper extends BaseAddressTypeMapper<RentableAdd
         // Mapeamento dos campos específicos no builder do Response
         builder.title(model.getTitle())
                 .description(model.getDescription())
+                .hostId(model.getUser().getId())
                 .complement(model.getComplement())
                 .pricePerNight(model.getPricePerNight())
                 .maxGuests(model.getMaxGuests())
-                .images(model.getImages())
+                .images(model.getImages().stream().map((image) -> new RentableAddressImageResponseDTO(
+                                image.getId(),
+                                image.getOriginalName(),
+                                image.getS3Key(),
+                                image.getContentType(),
+                                image.getFileSize(),
+                                image.isMain(),
+                                image.getCreatedAt())).toList())
+                .hostName(model.getUser().getName())
                 .amenities(model.getAmenities())
                 .availableFrom(model.getAvailableFrom())
                 .availableTo(model.getAvailableTo())
