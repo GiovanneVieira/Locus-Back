@@ -50,6 +50,8 @@ public class RentableAddressStrategy implements AddressStrategy {
         var savedAddress = rentableAddressRepository.save(address);
 
         // Se for o DTO especializado de locação, vincula as imagens órfãs da Fase 1
+
+
         if (dto instanceof RentableAddressRequestDTO rentableDto) {
             imageService.bindImagesToAddress(rentableDto.getImageIds(), savedAddress, rentableDto.getMainImageId());
         }

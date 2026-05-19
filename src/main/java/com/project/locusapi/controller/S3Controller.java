@@ -28,13 +28,15 @@ public class S3Controller {
 
     @PostMapping("/upload/multiple")
     public ResponseEntity<?> uploadMultiple(@RequestParam("files") MultipartFile[] files) throws IOException {
-        List<String> fileUrls = new ArrayList<>();
+        List<String> fileKeys = new ArrayList<>();
+
         for (MultipartFile file : files) {
-            s3Service.uploadFile(file);
-           var fileName = this.s3Service.getUrlFromFileName(file.getOriginalFilename());
-           fileUrls.add(fileName);
+            // Reparo: Devolvemos apenas a Key exata gerada pelo S3
+            String s3Key = s3Service.uploadFile(file);
+            fileKeys.add(s3Key);
         }
-        return ResponseEntity.status(HttpStatus.OK).body(fileUrls);
+
+        return ResponseEntity.status(HttpStatus.OK).body(fileKeys);
     }
 
     @GetMapping("/download/multiple")
