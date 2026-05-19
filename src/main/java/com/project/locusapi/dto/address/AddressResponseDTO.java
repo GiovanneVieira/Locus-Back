@@ -24,4 +24,9 @@ public abstract class AddressResponseDTO {
     private String houseNumber;
     private CEP cep;
     private Boolean isRentable;
+
+    public String getFullAddressForMap() {
+        // Ajuste os nomes das variáveis (street, city, etc) para os que você usou no DTO
+        return this.street + ", " + this.city + " - " + this.state + ", " + this.country;
+    }
 }
