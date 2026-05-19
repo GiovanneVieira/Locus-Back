@@ -49,4 +49,7 @@ public class RentableAddressRequestDTO extends AddressRequestDTO {
 
     @NotNull(message = "Defina qual imagem será a principal (capa) do anúncio")
     private UUID mainImageId;
+
+    private Double  latitude;
+    private Double longitude;
 }

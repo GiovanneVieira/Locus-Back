@@ -9,6 +9,7 @@ import com.project.locusapi.dto.address.personal.PersonalAddressRequestDTO;
 import com.project.locusapi.dto.address.rentable.RentableAddressRequestDTO;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -43,10 +44,14 @@ public abstract class AddressRequestDTO {
     @NotBlank(message = "State is required")
     private String state;
 
-    @NotNull(message = "house number is required")
+    @NotBlank(message = "house number is required")
     @JsonProperty("number")
     @JsonAlias("houseNumber")
-    private Integer houseNumber;
+    @Pattern(
+            regexp = "^[A-Za-z0-9\\s/-]{1,10}$",
+            message = "O número do endereço contém caracteres inválidos ou é muito longo."
+    )
+    private String houseNumber;
 
     @NotNull(message = "ZIP Code is required")
     @JsonProperty("zipCode")

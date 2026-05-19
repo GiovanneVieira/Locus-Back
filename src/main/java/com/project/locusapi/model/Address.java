@@ -37,7 +37,7 @@ public abstract class Address {
     private String state;
 
     @Column(name = "house_number", nullable = false)
-    private Integer houseNumber;
+    private String houseNumber;
 
     // O CepConverter com autoApply=true interceptará esse tipo automaticamente
     @Column(name = "cep_code", length = 8, nullable = false)
@@ -45,7 +45,7 @@ public abstract class Address {
     private CEP cep;
 
 
-    public Address(String street, String city, String country, String state, Integer houseNumber, CEP cep) {
+    public Address(String street, String city, String country, String state, String houseNumber, CEP cep) {
         this.street = street;
         this.city = city;
         this.country = country;

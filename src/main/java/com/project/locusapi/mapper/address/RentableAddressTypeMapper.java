@@ -45,6 +45,8 @@ public class RentableAddressTypeMapper extends BaseAddressTypeMapper<RentableAdd
         model.setMaxGuests(dto.getMaxGuests());
         model.setAvailableFrom(dto.getAvailableFrom());
         model.setAvailableTo(dto.getAvailableTo());
+        model.setLatitude(dto.getLatitude());
+        model.setLongitude(dto.getLongitude());
 
         if (dto.getAmenities() != null) {
             model.setAmenities(new ArrayList<>(dto.getAmenities()));
@@ -77,6 +79,8 @@ public class RentableAddressTypeMapper extends BaseAddressTypeMapper<RentableAdd
                                 image.isMain(),
                                 image.getCreatedAt())).toList())
                 .hostName(model.getUser().getName())
+                .latitude(model.getLatitude())
+                .longitude(model.getLongitude())
                 .amenities(model.getAmenities())
                 .availableFrom(model.getAvailableFrom())
                 .availableTo(model.getAvailableTo())
@@ -87,7 +91,7 @@ public class RentableAddressTypeMapper extends BaseAddressTypeMapper<RentableAdd
 
     @Override
     public void update(RentableAddressRequestDTO dto, RentableAddressModel model) {
-        updateCommonFields(dto, model); // Atualiza base comum de endereços
+        updateCommonFields(dto, model);
 
         if (dto.getTitle() != null) model.setTitle(dto.getTitle());
         if (dto.getDescription() != null) model.setDescription(dto.getDescription());
@@ -96,5 +100,8 @@ public class RentableAddressTypeMapper extends BaseAddressTypeMapper<RentableAdd
         if (dto.getAmenities() != null) model.setAmenities(new ArrayList<>(dto.getAmenities()));
         if (dto.getAvailableFrom() != null) model.setAvailableFrom(dto.getAvailableFrom());
         if (dto.getAvailableTo() != null) model.setAvailableTo(dto.getAvailableTo());
+        if (dto.getLatitude() != null) model.setLatitude(dto.getLatitude());
+        if (dto.getLongitude() != null) model.setLongitude(dto.getLongitude());
+        if (dto.getComplement() != null) model.setComplement(dto.getComplement());
     }
 }

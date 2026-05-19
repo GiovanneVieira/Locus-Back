@@ -28,6 +28,8 @@ public class RentableAddressResponseDTO extends AddressResponseDTO {
     @JsonIgnoreProperties("address")
     private List<RentableAddressImageResponseDTO> images;
     private List<String> amenities;
+    private Double latitude;
+    private Double longitude;
     private LocalDate availableFrom;
     private LocalDate availableTo;
 

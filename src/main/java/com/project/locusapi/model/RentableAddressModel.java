@@ -60,6 +60,12 @@ public class RentableAddressModel extends Address {
     @JsonIgnoreProperties("address")
     private List<Rental> rentals = new ArrayList<>();
 
+    @Column(name = "latitude")
+    private Double latitude;
+
+    @Column(name = "longitude")
+    private Double longitude;
+
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
@@ -73,7 +79,7 @@ public class RentableAddressModel extends Address {
             String city,
             String country,
             String state,
-            Integer houseNumber,
+            String houseNumber,
             CEP cep,
             String title,
             String description,

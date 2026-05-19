@@ -27,7 +27,7 @@ public class PersonalAddressModel extends Address {
             String city,
             String country,
             String state,
-            Integer houseNumber,
+            String houseNumber,
             CEP cep,
             String addressName
     ) {
