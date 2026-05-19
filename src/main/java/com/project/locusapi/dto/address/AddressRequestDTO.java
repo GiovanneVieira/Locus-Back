@@ -43,13 +43,11 @@ public abstract class AddressRequestDTO {
     @NotBlank(message = "State is required")
     private String state;
 
-    // 🔢 Aceita tanto "number" quanto "houseNumber" vindos do JSON
     @NotNull(message = "house number is required")
     @JsonProperty("number")
     @JsonAlias("houseNumber")
     private Integer houseNumber;
 
-    // ✉️ Aceita tanto "zipCode" quanto "cep" vindos do JSON
     @NotNull(message = "ZIP Code is required")
     @JsonProperty("zipCode")
     @JsonAlias("cep")
