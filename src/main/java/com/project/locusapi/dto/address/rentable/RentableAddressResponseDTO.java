@@ -10,6 +10,7 @@ import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Getter
@@ -22,7 +23,6 @@ public class RentableAddressResponseDTO extends AddressResponseDTO {
     private String complement;
     private Integer pricePerNight;
     private Integer maxGuests;
-
     @JsonIgnoreProperties("address")
     private List<RentableAddressImage> images;
     private List<String> amenities;
@@ -31,5 +31,6 @@ public class RentableAddressResponseDTO extends AddressResponseDTO {
 
     @JsonIgnoreProperties("rentableAddress")
     private List<Rental> rentals;
+    private LocalDateTime createdAt;
 
 }

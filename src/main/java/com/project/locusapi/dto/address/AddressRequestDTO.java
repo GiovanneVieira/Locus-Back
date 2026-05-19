@@ -1,5 +1,6 @@
 package com.project.locusapi.dto.address;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
@@ -42,12 +43,15 @@ public abstract class AddressRequestDTO {
     @NotBlank(message = "State is required")
     private String state;
 
+    // 🔢 Aceita tanto "number" quanto "houseNumber" vindos do JSON
     @NotNull(message = "house number is required")
     @JsonProperty("number")
+    @JsonAlias("houseNumber")
     private Integer houseNumber;
 
-    // CORREÇÃO: Mudado de @NotBlank para @NotNull porque CEP agora é um Value Object (Record)
+    // ✉️ Aceita tanto "zipCode" quanto "cep" vindos do JSON
     @NotNull(message = "ZIP Code is required")
     @JsonProperty("zipCode")
+    @JsonAlias("cep")
     private CEP cep;
 }

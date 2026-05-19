@@ -69,7 +69,8 @@ public class RentableAddressTypeMapper extends BaseAddressTypeMapper<RentableAdd
                 .images(model.getImages())
                 .amenities(model.getAmenities())
                 .availableFrom(model.getAvailableFrom())
-                .availableTo(model.getAvailableTo());
+                .availableTo(model.getAvailableTo())
+                .createdAt(model.getCreatedAt());
 
         return builder.build();
     }
