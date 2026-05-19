@@ -18,6 +18,7 @@ public abstract class AddressResponseDTO {
     private UUID id;
     private String city;
     private String street;
+    private String neighborhood;
     private String country;
     private String state;
     private String houseNumber;

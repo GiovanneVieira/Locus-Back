@@ -60,6 +60,7 @@ public class SecurityConfig {
                             hostRoutes.forEach((method, patterns) ->
                                     authorize.requestMatchers(method, patterns).hasRole("HOST")
                             );
+                            authorize.requestMatchers(HttpMethod.GET, "/s3/rentable-address/image/**").permitAll();
                             authorize.requestMatchers(HttpMethod.GET, "/address/rentable/**").permitAll();
                             authorize.anyRequest().authenticated();
                         }

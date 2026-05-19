@@ -30,6 +30,7 @@ public class RentableAddressTypeMapper extends BaseAddressTypeMapper<RentableAdd
         // Campos herdados de Address
         model.setStreet(dto.getStreet());
         model.setCity(dto.getCity());
+        model.setNeighborhood(dto.getNeighborhood());
         model.setCountry(dto.getCountry());
         model.setState(dto.getState());
         model.setHouseNumber(dto.getHouseNumber());

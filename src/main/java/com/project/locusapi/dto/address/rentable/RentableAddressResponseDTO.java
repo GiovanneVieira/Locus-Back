@@ -1,5 +1,6 @@
 package com.project.locusapi.dto.address.rentable;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.project.locusapi.dto.address.AddressResponseDTO;
 import com.project.locusapi.model.Rental;
 import com.project.locusapi.model.s3filemetadata.RentableAddressImage;
@@ -21,11 +22,14 @@ public class RentableAddressResponseDTO extends AddressResponseDTO {
     private String complement;
     private Integer pricePerNight;
     private Integer maxGuests;
+
+    @JsonIgnoreProperties("address")
     private List<RentableAddressImage> images;
     private List<String> amenities;
     private LocalDate availableFrom;
     private LocalDate availableTo;
-    private List<Rental> rentals;
 
+    @JsonIgnoreProperties("rentableAddress")
+    private List<Rental> rentals;
 
 }

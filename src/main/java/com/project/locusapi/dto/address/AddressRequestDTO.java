@@ -33,6 +33,9 @@ public abstract class AddressRequestDTO {
     @NotBlank(message = "Street is required")
     private String street;
 
+    @NotBlank(message = "neighborhood is required")
+    private String neighborhood;
+
     @NotBlank(message = "Country is required")
     private String country;
 

@@ -12,11 +12,11 @@ public abstract class BaseAddressTypeMapper<M extends Address, Q extends Address
         builder.id(model.getId())
                 .city(model.getCity())
                 .street(model.getStreet())
+                .neighborhood(model.getNeighborhood())
                 .country(model.getCountry())
                 .state(model.getState())
                 .houseNumber(String.valueOf(model.getHouseNumber()))
                 .cep(model.getCep())
-                // CORREÇÃO: Resolve dinamicamente via polimorfismo para alimentar o DTO legado do front-end
                 .isRentable(model instanceof RentableAddressModel);
     }
 

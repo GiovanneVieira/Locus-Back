@@ -12,7 +12,7 @@ import java.util.UUID;
 @Getter
 @Setter
 @Entity
-@NoArgsConstructor // Lombok gera o construtor padrão vazio exigido pelo JPA
+@NoArgsConstructor
 @Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
 public abstract class Address {
 
@@ -23,6 +23,9 @@ public abstract class Address {
 
     @Column(nullable = false)
     private String street;
+
+    @Column(nullable = false)
+    private String neighborhood;
 
     @Column(nullable = false)
     private String city;
