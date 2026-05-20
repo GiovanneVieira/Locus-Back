@@ -78,10 +78,10 @@ class OTPServiceTest {
             when(valueOperations.get(redisKeyTest)).thenReturn(correctCode);
 
             // Act
-            boolean resultado = otpService.validateOtp(emailTest, correctCode);
+            String resultado = otpService.validateOtp(emailTest, correctCode);
 
             // Assert
-            assertThat(resultado).isTrue();
+            assertThat(resultado).isNotEmpty();
 
             // Garante a proteção contra Replay Attack: o código precisa ser deletado imediatamente após o sucesso
             verify(redisTemplate).delete(redisKeyTest);

@@ -82,7 +82,7 @@ class EmailServiceTest {
                     .thenReturn("<html>Conteudo HTML de boas-vindas</html>");
 
             // Act
-            emailService.sendWelcomeEmail(emailDestino, "Boas-vindas ao Locus!");
+            emailService.sendWelcomeEmail(emailDestino);
 
             // Assert
             verify(templateEngine).process(eq("welcome/html"), any(Context.class));
@@ -98,7 +98,7 @@ class EmailServiceTest {
                     .thenThrow(new RuntimeException("Erro no motor do Thymeleaf"));
 
             // Act & Assert
-            assertThatThrownBy(() -> emailService.sendWelcomeEmail("teste@locus.com", "Subject"))
+            assertThatThrownBy(() -> emailService.sendWelcomeEmail("teste@locus.com"))
                     .isInstanceOf(RuntimeException.class)
                     .hasMessageContaining("Error rendering or sending email template");
         }

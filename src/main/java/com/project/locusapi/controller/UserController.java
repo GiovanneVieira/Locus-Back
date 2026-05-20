@@ -1,5 +1,6 @@
 package com.project.locusapi.controller;
 
+import com.project.locusapi.dto.forgotpassword.ForgotPasswordDTO;
 import com.project.locusapi.dto.user.ActivateUserDTO;
 import com.project.locusapi.dto.user.UserRequestDTO;
 import com.project.locusapi.mapper.UserMapper;
@@ -84,4 +85,9 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
+    @PatchMapping("/forgot-password")
+    public ResponseEntity<?> forgotPassword(@Valid @RequestBody ForgotPasswordDTO dto) {
+        var user = this.userService.forgotPassword(dto);
+        return  ResponseEntity.status(HttpStatus.OK).body(user);
+    }
 }

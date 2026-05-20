@@ -2,10 +2,12 @@ package com.project.locusapi.service;
 
 import com.project.locusapi.constant.AuthProvider;
 import com.project.locusapi.constant.Role;
+import com.project.locusapi.dto.forgotpassword.ForgotPasswordDTO;
 import com.project.locusapi.dto.user.ActivateUserDTO;
 import com.project.locusapi.dto.user.UserRequestDTO;
 import com.project.locusapi.dto.user.UserResponseDTO;
 import com.project.locusapi.exception.business.EmailAlreadyExistsException;
+import com.project.locusapi.exception.business.NewPasswordEqualsPreviousPassword;
 import com.project.locusapi.exception.business.UserNotFoundException;
 import com.project.locusapi.mapper.UserMapper;
 import com.project.locusapi.model.UserModel;
@@ -26,11 +28,13 @@ public class UserService {
     private final UserRepository userRepository;
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
+    private final OTPService otpService;
 
-    public UserService(UserRepository userRepository, UserMapper userMapper, PasswordEncoder passwordEncoder) {
+    public UserService(UserRepository userRepository, UserMapper userMapper, PasswordEncoder passwordEncoder, OTPService otpService) {
         this.userRepository = userRepository;
         this.userMapper = userMapper;
         this.passwordEncoder = passwordEncoder;
+        this.otpService = otpService;
     }
 
     public UserResponseDTO createUser(@Valid UserRequestDTO requestDTO) {
@@ -142,4 +146,22 @@ public class UserService {
         this.userRepository.delete(user);
         return this.userMapper.toUserResponseDTO(user);
     }
+
+    public UserResponseDTO forgotPassword(ForgotPasswordDTO dto) {
+        var user = this.getUserByEmail(dto.email()).orElseThrow(() -> new UserNotFoundException(dto.email()));
+
+        if(!otpService.validateToken(dto.otpToken(), dto.email())){
+            throw new RuntimeException("Token expired");
+        }
+
+        if(passwordEncoder.matches(dto.password(), user.getPassword())) {
+            throw new NewPasswordEqualsPreviousPassword();
+        }
+
+        var newPassword = this.passwordEncoder.encode(dto.password());
+        user.setPassword(newPassword);
+        user.setUpdatedAt(LocalDateTime.now());
+        return this.userMapper.toUserResponseDTO(this.userRepository.save(user));
+    }
+
 }

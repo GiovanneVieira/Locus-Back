@@ -2,6 +2,7 @@ package com.project.locusapi.handler;
 
 import com.project.locusapi.handler.OAuth2.OAuth2UserExtractor;
 import com.project.locusapi.service.AuthService;
+import com.project.locusapi.service.EmailService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -14,6 +15,7 @@ import org.springframework.security.web.authentication.SimpleUrlAuthenticationSu
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Component
@@ -23,6 +25,7 @@ public class CustomOAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHa
 
     private final AuthService authService;
     private final List<OAuth2UserExtractor> extractors;
+    private final EmailService emailService;
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
@@ -48,6 +51,12 @@ public class CustomOAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHa
         authResult.cookies().forEach(cookie ->
                 response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString())
         );
+
+        LocalDateTime createdAt = oAuth2User.getAttribute("createdAt");
+        LocalDateTime updatedAt = oAuth2User.getAttribute("updatedAt");
+        if(createdAt!=null && createdAt.equals(updatedAt)) {
+            emailService.sendWelcomeEmail(email);
+        }
 
         // Redireciona para o Dashboard no React
         getRedirectStrategy().sendRedirect(request, response, "http://localhost:5173");

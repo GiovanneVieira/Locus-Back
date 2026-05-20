@@ -33,12 +33,12 @@ public class EmailService implements CommunicationManager {
         mailSender.send(message);
     }
 
-    public void sendWelcomeEmail(String to, String subject) {
+    public void sendWelcomeEmail(String to) {
 
         Map<String, Object> variables = Map.of("username", to);
 
         try {
-            emailHelper(to, subject, "welcome/html", variables);
+            emailHelper(to, "Boas vindas ao Locus!", "emails/welcome", variables);
         } catch (Exception e) {
             throw new RuntimeException("Error rendering or sending email template", e);
         }

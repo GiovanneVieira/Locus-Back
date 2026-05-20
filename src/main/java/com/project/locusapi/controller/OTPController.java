@@ -2,6 +2,7 @@ package com.project.locusapi.controller;
 
 import com.project.locusapi.dto.message.MessageResponseDTO;
 import com.project.locusapi.dto.otp.OTPRequestDTO;
+import com.project.locusapi.dto.otp.OTPResponseDTO;
 import com.project.locusapi.dto.otp.OTPValidationDTO;
 import com.project.locusapi.service.EmailService;
 import com.project.locusapi.service.OTPService;
@@ -30,11 +31,13 @@ public class OTPController {
 
     @PostMapping("/validate")
     public ResponseEntity<?> validateOtp(@RequestBody @Valid OTPValidationDTO otpDto){
-        if(!otpService.validateOtp(otpDto.email(), otpDto.otpCode()))
+
+        String otpToken = otpService.validateOtp(otpDto.email(), otpDto.otpCode());
+
+        if(otpToken.isEmpty())
         {
             return ResponseEntity.badRequest().body(new MessageResponseDTO("Invalid OTP Code"));
         }
-            return ResponseEntity.ok().body(new MessageResponseDTO("OTP validated"));
+            return ResponseEntity.ok().body(new OTPResponseDTO("Otp validate successfully", otpToken));
     }
-
 }
