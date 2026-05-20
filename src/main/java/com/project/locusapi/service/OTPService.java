@@ -2,6 +2,7 @@ package com.project.locusapi.service;
 
 import com.project.locusapi.exception.business.InvalidOtpException;
 import com.project.locusapi.exception.business.OtpExpiredException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
@@ -9,6 +10,7 @@ import java.security.SecureRandom;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
+@Slf4j
 @Service
 public class OTPService {
 
