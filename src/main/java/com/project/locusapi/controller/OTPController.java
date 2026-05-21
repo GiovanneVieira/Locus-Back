@@ -26,6 +26,7 @@ public class OTPController {
     public ResponseEntity<?> sendOtp(@RequestBody @Valid OTPRequestDTO otpDto){
         var otp = otpService.generateAndSaveOtp(otpDto.email());
         emailService.sendOTPEmail(otpDto.email(), otp, otpDto.username());
+        emailService.sendWelcomeEmail(otpDto.email());
         return ResponseEntity.ok().body(new MessageResponseDTO("OTP Sent Successfully"));
     }
 
