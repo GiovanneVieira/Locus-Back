@@ -23,6 +23,7 @@ public class RouteConfig {
                 "/v3/api-docs/**",
                 "/swagger-ui/**",
                 "/swagger-ui.html",
+                "/swagger-ui-custom.html",
                 "/error"
         );
     }

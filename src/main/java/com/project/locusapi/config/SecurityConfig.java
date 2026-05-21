@@ -3,8 +3,10 @@ package com.project.locusapi.config;
 import com.project.locusapi.filter.SecurityFilter;
 import com.project.locusapi.handler.CustomOAuth2SuccessHandler;
 import com.project.locusapi.service.AppUserDetailsService;
+import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -31,18 +33,32 @@ import java.util.Map;
 @EnableWebSecurity
 public class SecurityConfig {
 
-    private final List<String> authorizedOrigins = List.of("http://localhost:8080", "http://localhost:5173");
-
     private final AppUserDetailsService userDetailsService;
     private final SecurityFilter securityFilter;
     private final List<String> publicRoutes;
     private final Map<HttpMethod, String[]> hostRoutes;
 
-    public SecurityConfig(AppUserDetailsService userDetailsService, SecurityFilter securityFilter, List<String> publicRoutes, Map<HttpMethod, String[]> hostRoutes) {
+    @Value("${spring.url.front}")
+    private String frontUrl;
+
+    // Deixamos sem o 'final' para que o método @PostConstruct possa preenchê-la
+    private List<String> authorizedOrigins;
+
+    // O construtor volta a receber apenas os seus beans normais (sem Strings de properties)
+    public SecurityConfig(AppUserDetailsService userDetailsService,
+                          SecurityFilter securityFilter,
+                          List<String> publicRoutes,
+                          Map<HttpMethod, String[]> hostRoutes) {
         this.userDetailsService = userDetailsService;
         this.securityFilter = securityFilter;
         this.publicRoutes = publicRoutes;
         this.hostRoutes = hostRoutes;
+    }
+
+    @PostConstruct
+    public void init() {
+        log.info("Inicializando origens do CORS com a URL do Frontend: {}", frontUrl);
+        this.authorizedOrigins = List.of("http://localhost:8080", frontUrl);
     }
 
     @Bean
