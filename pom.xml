@@ -85,6 +85,12 @@
             <version>2.5.0</version>
         </dependency>
 
+        <dependency>
+            <groupId>com.scalar.maven</groupId>
+            <artifactId>scalar</artifactId>
+            <version>0.1.0</version>
+        </dependency>
+
         <!-- Utils -->
         <dependency>
             <groupId>org.projectlombok</groupId>

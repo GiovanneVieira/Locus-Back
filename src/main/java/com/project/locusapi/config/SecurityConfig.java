@@ -3,7 +3,6 @@ package com.project.locusapi.config;
 import com.project.locusapi.filter.SecurityFilter;
 import com.project.locusapi.handler.CustomOAuth2SuccessHandler;
 import com.project.locusapi.service.AppUserDetailsService;
-import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -41,9 +40,6 @@ public class SecurityConfig {
     @Value("${spring.url.front}")
     private String frontUrl;
 
-    // Deixamos sem o 'final' para que o método @PostConstruct possa preenchê-la
-    private List<String> authorizedOrigins;
-
     // O construtor volta a receber apenas os seus beans normais (sem Strings de properties)
     public SecurityConfig(AppUserDetailsService userDetailsService,
                           SecurityFilter securityFilter,
@@ -53,12 +49,6 @@ public class SecurityConfig {
         this.securityFilter = securityFilter;
         this.publicRoutes = publicRoutes;
         this.hostRoutes = hostRoutes;
-    }
-
-    @PostConstruct
-    public void init() {
-        log.info("Inicializando origens do CORS com a URL do Frontend: {}", frontUrl);
-        this.authorizedOrigins = List.of("http://localhost:8080", frontUrl);
     }
 
     @Bean
@@ -94,8 +84,20 @@ public class SecurityConfig {
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
+
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(authorizedOrigins);
+
+        String cleanedUrl = (frontUrl != null && frontUrl.endsWith("/"))
+                ? frontUrl.substring(0, frontUrl.length() - 1)
+                : frontUrl;
+
+        configuration.setAllowedOrigins(List.of(
+                "http://localhost:8080",
+                "http://localhost:5173",
+                cleanedUrl != null ? cleanedUrl : ""
+        ));
+
+        configuration.setAllowedOriginPatterns(List.of("https://locus-front*.vercel.app"));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         configuration.setAllowCredentials(true);
         configuration.setAllowedHeaders(List.of("Authorization", "Cache-Control", "Content-Type"));

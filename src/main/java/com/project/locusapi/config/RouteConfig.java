@@ -24,6 +24,8 @@ public class RouteConfig {
                 "/swagger-ui/**",
                 "/swagger-ui.html",
                 "/swagger-ui-custom.html",
+                "/scalar/**",
+                "/openapi.json",
                 "/error"
         );
     }
