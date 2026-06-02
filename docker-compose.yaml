@@ -10,8 +10,6 @@ services:
       - .env
     environment:
       - SPRING_PROFILES_ACTIVE=dev
-    depends_on:
-      - redis
     restart: no
     develop:
       watch:
@@ -24,15 +22,3 @@ services:
         - path: ./src/main/resources
           action: sync
           target: /app/resources
-
-  redis:
-    image: redis:7-alpine
-    container_name: locus-redis
-    restart: always
-    ports:
-      - "6379:6379"
-    volumes:
-      - redis_data:/data
-
-volumes:
-  redis_data:
