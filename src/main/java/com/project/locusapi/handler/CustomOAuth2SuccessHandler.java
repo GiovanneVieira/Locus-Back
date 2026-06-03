@@ -7,6 +7,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
@@ -27,6 +28,8 @@ public class CustomOAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHa
     private final List<OAuth2UserExtractor> extractors;
     private final EmailService emailService;
 
+    @Value("${spring.url.front}")
+    private String frontUrl;
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
                                         Authentication authentication) throws IOException {
@@ -57,8 +60,7 @@ public class CustomOAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHa
         if(createdAt!=null && createdAt.equals(updatedAt)) {
             emailService.sendWelcomeEmail(email);
         }
-
         // Redireciona para o Dashboard no React
-        getRedirectStrategy().sendRedirect(request, response, "http://localhost:5173");
+        getRedirectStrategy().sendRedirect(request, response, frontUrl);
     }
 }
