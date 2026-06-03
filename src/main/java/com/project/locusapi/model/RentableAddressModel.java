@@ -66,6 +66,8 @@ public class RentableAddressModel extends Address {
     @Column(name = "longitude")
     private Double longitude;
 
+    private List<RatingModel> ratings;
+
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
