@@ -1,0 +1,39 @@
+name: Deploy Locus API
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    name: Conectar na EC2 e Atualizar Containers
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Executar script de deploy via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          port: 22
+          script: |
+            echo "--- Iniciando o Deploy na EC2 ---"
+            
+            # 1. Navega até a pasta onde está o repositório clonado na AWS
+            cd /home/ubuntu/Locus-Back
+            
+            # 2. Descarte qualquer alteração local acidental na máquina para evitar conflitos de merge
+            git reset --hard FETCH_HEAD
+            
+            # 3. Puxa as atualizações mais recentes do GitHub
+            git pull origin main
+            
+            # 4. Derruba os containers antigos limpadamente
+            docker-compose down
+            
+            # 5. Reconstrói as imagens com o código novo e sobe em background (-d)
+            docker-compose up -d --build
+            
+            echo "--- Deploy finalizado com sucesso! ---"
