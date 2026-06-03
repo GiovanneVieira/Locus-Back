@@ -22,3 +22,15 @@ services:
         - path: ./src/main/resources
           action: sync
           target: /app/resources
+  nginx:
+    image: nginx:alpine
+    container_name: locus-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/locus.conf:/etc/nginx/conf.d/default.conf:ro
+      - /etc/letsencrypt:/etc/letsencrypt:ro
+    depends_on:
+      - app
+    restart: always
