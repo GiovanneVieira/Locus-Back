@@ -87,8 +87,6 @@ public class AuthService {
         if (refreshToken != null && !refreshToken.isBlank()) {
             refreshTokenService.deleteByToken(refreshToken);
         }
-
-        // O serviço apenas gera os objetos de cookies limpos
         ResponseCookie cleanAccess = jwtService.getCleanCookie("accessToken");
         ResponseCookie cleanRefresh = jwtService.getCleanCookie("refreshToken");
 

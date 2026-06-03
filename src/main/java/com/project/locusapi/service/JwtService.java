@@ -74,9 +74,16 @@ public class JwtService {
                 .getClaim("roles").asList(String.class);
     }
 
+    private boolean isProd(){
+        return "production".equalsIgnoreCase(springEnv);
+    }
+
     public ResponseCookie getCleanCookie(String name) {
+
         return ResponseCookie.from(name, "")
                 .httpOnly(true)
+                .secure(isProd())
+                .sameSite(isProd() ? "None" : "Lax")
                 .path("/")
                 .maxAge(0)
                 .build();
@@ -84,14 +91,12 @@ public class JwtService {
 
     private ResponseCookie generateCookie(String tokenName, String tokenValue, Integer maxAge) {
 
-        boolean isProd = "production".equalsIgnoreCase(springEnv);
-
         return ResponseCookie
                 .from(tokenName, tokenValue)
                 .httpOnly(true)
-                .secure(isProd)
+                .secure(isProd())
                 .maxAge(maxAge)
-                .sameSite(isProd ? "None" : "Lax")
+                .sameSite(isProd() ? "None" : "Lax")
                 .path("/")
                 .build();
     }
