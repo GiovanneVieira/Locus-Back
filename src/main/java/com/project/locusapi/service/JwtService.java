@@ -4,6 +4,7 @@ import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.project.locusapi.config.JwtPropertiesConfig;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseCookie;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -17,6 +18,9 @@ import java.util.List;
 public class JwtService {
 
     private final JwtPropertiesConfig jwtPropertiesConfig;
+
+    @Value("${spring.dev.environment}")
+    private String springEnv;
 
     private Algorithm getAlgorithm() {
         return Algorithm.HMAC256(jwtPropertiesConfig.getSecret());
@@ -79,12 +83,15 @@ public class JwtService {
     }
 
     private ResponseCookie generateCookie(String tokenName, String tokenValue, Integer maxAge) {
+
+        boolean isProd = "production".equalsIgnoreCase(springEnv);
+
         return ResponseCookie
                 .from(tokenName, tokenValue)
                 .httpOnly(true)
-                .secure(false) // Mudar para true em produção
+                .secure(isProd)
                 .maxAge(maxAge)
-                .sameSite("Lax")
+                .sameSite(isProd ? "None" : "Lax")
                 .path("/")
                 .build();
     }
