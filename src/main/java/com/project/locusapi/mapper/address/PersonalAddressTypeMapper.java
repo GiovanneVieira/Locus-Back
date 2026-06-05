@@ -20,7 +20,7 @@ public class PersonalAddressTypeMapper extends BaseAddressTypeMapper<PersonalAdd
     public PersonalAddressModel toModel(PersonalAddressRequestDTO dto) {
         return new PersonalAddressModel(
                 dto.getStreet(), dto.getCity(), dto.getCountry(),
-                dto.getState(), dto.getHouseNumber(), dto.getCep(),
+                dto.getState(), dto.getHouseNumber(), dto.getNeighborhood(), dto.getCep(),
                 dto.getAddressName()
         );
     }

@@ -79,6 +79,16 @@ public class UserModel implements UserDetails {
     @JsonBackReference
     private List<RentableAddressModel> rentableAddress = new ArrayList<>();
 
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    @JsonBackReference
+    private List<RatingModel> ratings = new ArrayList<>();
+
+    @OneToMany(mappedBy = "user", cascade =  CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    @JsonBackReference
+    private List<CommentModel> comments = new ArrayList<>();
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         if (this.role == Role.ADMIN) {

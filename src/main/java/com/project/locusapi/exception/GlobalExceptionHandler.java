@@ -3,6 +3,7 @@ package com.project.locusapi.exception;
 import com.auth0.jwt.exceptions.*;
 import com.project.locusapi.dto.error.StandardErrorDTO;
 import com.project.locusapi.exception.business.BusinessException;
+import com.project.locusapi.exception.business.RatingsNotFoundException;
 import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -288,5 +289,19 @@ public class GlobalExceptionHandler {
                 request.getRequestURI()
         );
         return ResponseEntity.status(HttpStatus.BAD_GATEWAY).body(errorDto);
+    }
+
+
+    // Ratings Exception
+    @ExceptionHandler(RatingsNotFoundException.class)
+    public ResponseEntity<StandardErrorDTO> handleRatingsNotFoundException(RatingsNotFoundException ex, HttpServletRequest request) {
+        StandardErrorDTO errorDto = new StandardErrorDTO(
+                LocalDateTime.now(),
+                HttpStatus.NOT_FOUND.value(),
+                "Ratings not found",
+                ex.getMessage(),
+                request.getRequestURI()
+        );
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorDto);
     }
 }

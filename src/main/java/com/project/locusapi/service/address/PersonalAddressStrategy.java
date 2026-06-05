@@ -1,4 +1,4 @@
-package com.project.locusapi.service.strategy;
+package com.project.locusapi.service.address;
 
 import com.project.locusapi.constant.AddressType;
 import com.project.locusapi.dto.address.AddressRequestDTO;
@@ -10,7 +10,6 @@ import com.project.locusapi.mapper.address.AddressMapper;
 import com.project.locusapi.model.PersonalAddressModel;
 import com.project.locusapi.repository.PersonalAddressRepository;
 import com.project.locusapi.repository.UserRepository;
-import com.project.locusapi.service.address.AddressStrategy;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Component;

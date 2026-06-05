@@ -28,10 +28,11 @@ public class PersonalAddressModel extends Address {
             String country,
             String state,
             String houseNumber,
+            String neighborhood,
             CEP cep,
             String addressName
     ) {
-        super(street, city, country, state, houseNumber, cep);
+        super(street, city, country, state, houseNumber, cep, neighborhood);
         this.addressName = addressName;
     }
 }

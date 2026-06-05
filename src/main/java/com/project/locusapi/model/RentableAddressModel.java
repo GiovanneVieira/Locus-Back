@@ -66,7 +66,13 @@ public class RentableAddressModel extends Address {
     @Column(name = "longitude")
     private Double longitude;
 
-    private List<RatingModel> ratings;
+    @OneToMany(mappedBy = "rentableAddress", cascade =  CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonIgnoreProperties("rentableAddress")
+    private List<RatingModel> ratings = new ArrayList<>();
+
+    @OneToMany(mappedBy = "rentableAddress", cascade =  CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonIgnoreProperties("rentableAddress")
+    private List<CommentModel> comments = new ArrayList<>();
 
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
@@ -88,9 +94,10 @@ public class RentableAddressModel extends Address {
             String complement,
             Integer pricePerNight,
             Integer maxGuests,
+            String neighborhood,
             LocalDate availableFrom,
             LocalDate availableTo) {
-        super(street, city, country, state, houseNumber, cep);
+        super(street, city, country, state, houseNumber, cep, neighborhood);
         this.title = title;
         this.description = description;
         this.complement = complement;
@@ -99,4 +106,5 @@ public class RentableAddressModel extends Address {
         this.availableFrom = availableFrom;
         this.availableTo = availableTo;
     }
+
 }

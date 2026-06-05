@@ -45,10 +45,11 @@ public abstract class Address {
     private CEP cep;
 
 
-    public Address(String street, String city, String country, String state, String houseNumber, CEP cep) {
+    public Address(String street, String city, String country, String state, String houseNumber, CEP cep, String neighborhood) {
         this.street = street;
         this.city = city;
         this.country = country;
+        this.neighborhood = neighborhood;
         this.state = state;
         this.houseNumber = houseNumber;
         this.cep = cep;

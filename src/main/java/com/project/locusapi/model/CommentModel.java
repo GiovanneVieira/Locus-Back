@@ -9,36 +9,35 @@ import org.hibernate.annotations.UpdateTimestamp;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-@Entity(name = "rating_table")
+@Entity(name="comment_table")
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 @Getter
 @Setter
-@Builder
-public class RatingModel {
+public class CommentModel {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(name = "comment_id")
     private UUID id;
 
-    @Column(name = "rating_value")
-    private Double ratingValue;
+    @Column(name = "comment_desc", nullable = false, columnDefinition = "TEXT")
+    private String comment;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
-    @JsonIgnoreProperties("ratings")
+    @JsonIgnoreProperties("comments")
     private UserModel user;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "address_id", nullable = false)
-    @JsonIgnoreProperties("ratings")
+    @JsonIgnoreProperties("comments")
     private RentableAddressModel rentableAddress;
 
-    @Column(name = "created_at")
     @CreationTimestamp
     private LocalDateTime createdAt;
 
-    @Column(name = "updated_at")
     @UpdateTimestamp
     private LocalDateTime updatedAt;
 
