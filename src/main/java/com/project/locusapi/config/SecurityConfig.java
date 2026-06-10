@@ -68,6 +68,7 @@ public class SecurityConfig {
                             );
                             authorize.requestMatchers(HttpMethod.GET, "/s3/rentable-address/image/**").permitAll();
                             authorize.requestMatchers(HttpMethod.GET, "/address/rentable/**").permitAll();
+                            authorize.requestMatchers(HttpMethod.GET, "/reviews/**").permitAll();
                             authorize.requestMatchers(HttpMethod.PATCH, "/user/forgot-password").permitAll();
                             authorize.anyRequest().authenticated();
                         }
