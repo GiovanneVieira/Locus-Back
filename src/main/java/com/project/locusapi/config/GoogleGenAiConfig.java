@@ -21,7 +21,7 @@ public class GoogleGenAiConfig {
 
         return GoogleGenAiChatModel.builder()
                 .genAiClient(genAiClient)
-                .defaultOptions(GoogleGenAiChatOptions.builder().model("gemini-2.0-flash").build())
+                .defaultOptions(GoogleGenAiChatOptions.builder().model("gemini-3.5-flash").build())
                 .build();
     }
 

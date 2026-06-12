@@ -4,6 +4,7 @@ import com.project.locusapi.dto.destination.DestinationAIResponse;
 import com.project.locusapi.dto.destination.DestinationRequestDTO;
 import com.project.locusapi.dto.destination.DestinationResponseDTO;
 import com.project.locusapi.event.destination.DestinationCreatedEvent;
+import com.project.locusapi.exception.business.DestinationAlreadyExistsException;
 import com.project.locusapi.exception.business.DestinationNotFoundException;
 import com.project.locusapi.mapper.DestinationMapper;
 import com.project.locusapi.model.Destination;
@@ -28,9 +29,21 @@ public class DestinationService {
 
     @Transactional
     public DestinationResponseDTO create(DestinationRequestDTO dto) {
-        Destination destination = destinationRepository.save(destinationMapper.toEntity(dto));
+        // 1. Isola e limpa o nome da cidade logo na entrada
+        String cleanedCity = dto.city().trim();
 
-        if (destination.getTouristPoints().isEmpty()) {
+        if (destinationRepository.existsByCityIgnoreCase(cleanedCity)) {
+            throw new DestinationAlreadyExistsException("A cidade " + cleanedCity + " já está cadastrada.");
+        }
+
+        // 2. Transforma em entidade e força o valor limpo antes do save
+        Destination destinationEntity = destinationMapper.toEntity(dto);
+        destinationEntity.setCity(cleanedCity);
+
+        Destination destination = destinationRepository.save(destinationEntity);
+
+        // 3. Dispara o evento de forma segura
+        if (destination.getTouristPoints() == null || destination.getTouristPoints().isEmpty()) {
             eventPublisher.publishEvent(new DestinationCreatedEvent(destination.getId(), destination.getCity()));
         }
 

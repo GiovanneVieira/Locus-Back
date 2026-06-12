@@ -15,4 +15,6 @@ public interface DestinationRepository extends JpaRepository<Destination, UUID> 
     Optional<Destination> findByCityIgnoreCase(String city);
 
     Page<Destination> findByCityContainingIgnoreCase(String city, Pageable pageable);
+
+    boolean existsByCityIgnoreCase(String trim);
 }
