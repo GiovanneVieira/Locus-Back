@@ -36,7 +36,7 @@ public class SecurityConfig {
     private final SecurityFilter securityFilter;
     private final List<String> publicRoutes;
     private final Map<HttpMethod, String[]> hostRoutes;
-
+    private final Map<HttpMethod, String[]> adminRoutes;
     @Value("${spring.url.front}")
     private String frontUrl;
 
@@ -44,11 +44,13 @@ public class SecurityConfig {
     public SecurityConfig(AppUserDetailsService userDetailsService,
                           SecurityFilter securityFilter,
                           List<String> publicRoutes,
-                          Map<HttpMethod, String[]> hostRoutes) {
+                          Map<HttpMethod, String[]> hostRoutes,
+                          Map<HttpMethod, String[]> adminRoutes) {
         this.userDetailsService = userDetailsService;
         this.securityFilter = securityFilter;
         this.publicRoutes = publicRoutes;
         this.hostRoutes = hostRoutes;
+        this.adminRoutes = adminRoutes;
     }
 
     @Bean
@@ -66,6 +68,7 @@ public class SecurityConfig {
                             hostRoutes.forEach((method, patterns) ->
                                     authorize.requestMatchers(method, patterns).hasRole("HOST")
                             );
+                            adminRoutes.forEach((method, patterns) -> authorize.requestMatchers(method, patterns).hasRole("ADMIN"));
                             authorize.requestMatchers(HttpMethod.GET, "/s3/rentable-address/image/**").permitAll();
                             authorize.requestMatchers(HttpMethod.GET, "/address/rentable/**").permitAll();
                             authorize.requestMatchers(HttpMethod.GET, "/reviews/**").permitAll();

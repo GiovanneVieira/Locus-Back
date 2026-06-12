@@ -39,5 +39,11 @@ public class RouteConfig {
         );
     }
 
+    @Bean Map<HttpMethod, String[]> adminRoutes() {
+        return Map.of(
+                HttpMethod.GET, new String[]{"/user"},
+                HttpMethod.DELETE, new String[]{"/user/**"}
+        );
+    }
 
 }
