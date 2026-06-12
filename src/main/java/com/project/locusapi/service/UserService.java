@@ -4,6 +4,7 @@ import com.project.locusapi.constant.AuthProvider;
 import com.project.locusapi.constant.Role;
 import com.project.locusapi.dto.forgotpassword.ForgotPasswordDTO;
 import com.project.locusapi.dto.user.ActivateUserDTO;
+import com.project.locusapi.dto.user.UpdateUserDTO;
 import com.project.locusapi.dto.user.UserRequestDTO;
 import com.project.locusapi.dto.user.UserResponseDTO;
 import com.project.locusapi.event.metrics.UserActivatedEvent;
@@ -146,6 +147,36 @@ public class UserService {
         this.userRepository.save(user);
         return userMapper.toUserResponseDTO(user);
     }
+
+    public UserResponseDTO updateCurrentUser(UpdateUserDTO userDTO, Authentication authentication) {
+
+        var email = authentication.getName();
+        if (email == null) {
+            throw new UserNotFoundException("User not found");
+        }
+
+        var user = this.getUserByEmail(email).orElseThrow(() -> new UserNotFoundException(email));
+
+        // Proteção usando checagem de nulo + conteúdo real (isBlank)
+        if (userDTO.name() != null && !userDTO.name().isBlank()) {
+            user.setName(userDTO.name());
+        }
+        if (userDTO.bio() != null && !userDTO.bio().isBlank()) {
+            user.setBio(userDTO.bio());
+        }
+        if (userDTO.pfpUrl() != null && !userDTO.pfpUrl().isBlank()) {
+            user.setPfpUrl(userDTO.pfpUrl());
+        }
+        if (userDTO.phone() != null && !userDTO.phone().isBlank()) {
+            user.setPhone(userDTO.phone()); // CORRIGIDO: Agora seta o telefone no campo certo!
+        }
+
+        user.setUpdatedAt(LocalDateTime.now());
+
+        saveUser(user);
+        return userMapper.toUserResponseDTO(user);
+    }
+
 
     public UserResponseDTO deleteUser(UUID id) {
         var user = this.userRepository.findById(id)

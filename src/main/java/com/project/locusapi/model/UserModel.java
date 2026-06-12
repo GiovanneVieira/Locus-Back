@@ -48,6 +48,12 @@ public class UserModel implements UserDetails {
     @Column(name = "pfpUrl", columnDefinition = "TEXT", updatable = true)
     private String pfpUrl;
 
+    @Column(name = "bio", columnDefinition = "TEXT", updatable = true)
+    private String bio;
+
+    @Column(name = "phone")
+    private String phone;
+
     @CreationTimestamp
     @Column(name = "created_at", updatable = false, nullable = false)
     private LocalDateTime createdAt;

@@ -12,6 +12,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/s3")
@@ -22,8 +23,8 @@ public class S3Controller {
 
     @PostMapping("/upload")
     public ResponseEntity<?> upload(@RequestParam("file") MultipartFile file) throws IOException {
-        s3Service.uploadFile(file);
-        return ResponseEntity.ok("File uploaded successfully");
+        String key = s3Service.uploadFile(file);
+        return ResponseEntity.ok(Map.of("s3Key", key));
     }
 
     @PostMapping("/upload/multiple")

@@ -26,6 +26,7 @@ public class RouteConfig {
                 "/swagger-ui-custom.html",
                 "/scalar/**",
                 "/openapi.json",
+                "/ai/destinations/**",
                 "/error"
         );
     }
@@ -42,7 +43,9 @@ public class RouteConfig {
     @Bean Map<HttpMethod, String[]> adminRoutes() {
         return Map.of(
                 HttpMethod.GET, new String[]{"/user"},
-                HttpMethod.DELETE, new String[]{"/user/**"}
+                HttpMethod.DELETE, new String[]{"/user/**", "/destinations/**"},
+                HttpMethod.PUT, new String[]{"/destinations/**"},
+                HttpMethod.POST, new String[]{"/destinations/**"}
         );
     }
 

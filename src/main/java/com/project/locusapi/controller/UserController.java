@@ -2,6 +2,7 @@ package com.project.locusapi.controller;
 
 import com.project.locusapi.dto.forgotpassword.ForgotPasswordDTO;
 import com.project.locusapi.dto.user.ActivateUserDTO;
+import com.project.locusapi.dto.user.UpdateUserDTO;
 import com.project.locusapi.dto.user.UserRequestDTO;
 import com.project.locusapi.mapper.UserMapper;
 import com.project.locusapi.service.UserService;
@@ -46,6 +47,19 @@ public class UserController {
         var email = principal.getName();
         var user = userService.getUserByEmail(email).orElseThrow(() -> new EntityNotFoundException("User not found"));
         var response = userMapper.toUserResponseDTO(user);
+        return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
+
+    @PatchMapping("/me")
+    public ResponseEntity<?> updateCurrentUser(
+            @RequestBody UpdateUserDTO userDTO,
+            Authentication authentication
+    ) {
+        var response = userService.updateCurrentUser(userDTO, authentication);
+        if(response == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Erro ao atualizar usuario");
+        }
+
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
