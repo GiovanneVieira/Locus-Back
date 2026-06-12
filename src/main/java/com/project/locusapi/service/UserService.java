@@ -6,6 +6,8 @@ import com.project.locusapi.dto.forgotpassword.ForgotPasswordDTO;
 import com.project.locusapi.dto.user.ActivateUserDTO;
 import com.project.locusapi.dto.user.UserRequestDTO;
 import com.project.locusapi.dto.user.UserResponseDTO;
+import com.project.locusapi.event.metrics.UserActivatedEvent;
+import com.project.locusapi.event.metrics.UserRegisteredEvent;
 import com.project.locusapi.exception.business.EmailAlreadyExistsException;
 import com.project.locusapi.exception.business.NewPasswordEqualsPreviousPassword;
 import com.project.locusapi.exception.business.UserNotFoundException;
@@ -13,6 +15,7 @@ import com.project.locusapi.mapper.UserMapper;
 import com.project.locusapi.model.UserModel;
 import com.project.locusapi.repository.UserRepository;
 import jakarta.validation.Valid;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -29,12 +32,14 @@ public class UserService {
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
     private final OTPService otpService;
+    private final ApplicationEventPublisher eventPublisher;
 
-    public UserService(UserRepository userRepository, UserMapper userMapper, PasswordEncoder passwordEncoder, OTPService otpService) {
+    public UserService(UserRepository userRepository, UserMapper userMapper, PasswordEncoder passwordEncoder, OTPService otpService, ApplicationEventPublisher eventPublisher) {
         this.userRepository = userRepository;
         this.userMapper = userMapper;
         this.passwordEncoder = passwordEncoder;
         this.otpService = otpService;
+        this.eventPublisher = eventPublisher;
     }
 
     public UserResponseDTO createUser(@Valid UserRequestDTO requestDTO) {
@@ -49,6 +54,7 @@ public class UserService {
         newUser.setAuthProvider(AuthProvider.DEFAULT);
         newUser.setPfpUrl(null);
         var savedUser = this.userRepository.save(newUser);
+        eventPublisher.publishEvent(new UserRegisteredEvent(savedUser.getId(), savedUser.getEmail(), savedUser.isEnabled(), savedUser.getAuthProvider(), LocalDateTime.now()));
         return this.userMapper.toUserResponseDTO(savedUser);
     }
 
@@ -123,6 +129,7 @@ public class UserService {
                 .orElseThrow(() -> new UserNotFoundException(activateDto.email()));
         user.setEnabled(true);
         this.userRepository.save(user);
+        eventPublisher.publishEvent(new UserActivatedEvent(user.getId(), user.getEmail(), LocalDateTime.now()));
         return userMapper.toUserResponseDTO(user);
     }
 

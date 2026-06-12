@@ -70,6 +70,7 @@ public class SecurityConfig {
                             authorize.requestMatchers(HttpMethod.GET, "/address/rentable/**").permitAll();
                             authorize.requestMatchers(HttpMethod.GET, "/reviews/**").permitAll();
                             authorize.requestMatchers(HttpMethod.PATCH, "/user/forgot-password").permitAll();
+                            authorize.requestMatchers("/admin/**").hasRole("ADMIN");
                             authorize.anyRequest().authenticated();
                         }
                 ).sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
