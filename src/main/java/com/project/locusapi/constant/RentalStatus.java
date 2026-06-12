@@ -6,6 +6,7 @@ import lombok.Getter;
 public enum RentalStatus {
     CONFIRMED("confirmed"),
     PENDING("pending"),
+    DECLINED("declined"),
     CANCELLED("cancelled");
 
     private final String rentalString;

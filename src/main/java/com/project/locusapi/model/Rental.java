@@ -45,7 +45,15 @@ public class Rental {
     @Column(nullable = false)
     private Double priceAtTheTime;
 
+    // Número de hóspedes da reserva
+    @Column(name = "number_of_guests", nullable = false)
+    private Integer numberOfGuests;
+
+    // Mensagem opcional do hóspede ao anfitrião
+    @Column(columnDefinition = "TEXT")
+    private String message;
+
     // Status para controle de fluxo
     @Enumerated(EnumType.STRING)
-    private RentalStatus status; // Ex: PENDING, CONFIRMED, CANCELLED
+    private RentalStatus status; // Ex: PENDING, CONFIRMED, DECLINED, CANCELLED
 }
