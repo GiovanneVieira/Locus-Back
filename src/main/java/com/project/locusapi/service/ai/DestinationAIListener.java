@@ -19,7 +19,7 @@ public class DestinationAIListener {
     private final DestinationAIService destinationAIService;
     private final DestinationService destinationService;
 
-    @Async
+    @Async("applicationTaskExecutor")
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handleDestinationCreated(DestinationCreatedEvent event) {
         try {

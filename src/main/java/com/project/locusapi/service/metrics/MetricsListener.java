@@ -39,7 +39,7 @@ public class MetricsListener {
     private final StorageUploadMetricRepository storageUploadMetricRepository;
     private final CriticalFailureMetricRepository criticalFailureMetricRepository;
 
-    @Async
+    @Async("applicationTaskExecutor")
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT, fallbackExecution = true)
     public void onUserRegistered(UserRegisteredEvent event) {
@@ -53,7 +53,7 @@ public class MetricsListener {
                 .build());
     }
 
-    @Async
+    @Async("applicationTaskExecutor")
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT, fallbackExecution = true)
     public void onUserActivated(UserActivatedEvent event) {
@@ -66,7 +66,7 @@ public class MetricsListener {
                 .build());
     }
 
-    @Async
+    @Async("applicationTaskExecutor")
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT, fallbackExecution = true)
     public void onLoginSucceeded(LoginSucceededEvent event) {
@@ -82,7 +82,7 @@ public class MetricsListener {
                 .build());
     }
 
-    @Async
+    @Async("applicationTaskExecutor")
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT, fallbackExecution = true)
     public void onLoginFailed(LoginFailedEvent event) {
@@ -105,7 +105,7 @@ public class MetricsListener {
                 .build());
     }
 
-    @Async
+    @Async("applicationTaskExecutor")
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT, fallbackExecution = true)
     public void onOtpValidationFailed(OtpValidationFailedEvent event) {
@@ -117,7 +117,7 @@ public class MetricsListener {
                 .build());
     }
 
-    @Async
+    @Async("applicationTaskExecutor")
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT, fallbackExecution = true)
     public void onRentalCreated(RentalCreatedEvent event) {
@@ -131,7 +131,7 @@ public class MetricsListener {
                 .build());
     }
 
-    @Async
+    @Async("applicationTaskExecutor")
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT, fallbackExecution = true)
     public void onRentalStatusChanged(RentalStatusChangedEvent event) {
@@ -144,7 +144,7 @@ public class MetricsListener {
                 .build());
     }
 
-    @Async
+    @Async("applicationTaskExecutor")
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT, fallbackExecution = true)
     public void onS3UploadTracked(S3UploadTrackedEvent event) {

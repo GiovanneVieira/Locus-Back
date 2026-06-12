@@ -20,6 +20,7 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -43,6 +44,7 @@ public class UserService {
         this.eventPublisher = eventPublisher;
     }
 
+    @Transactional
     public UserResponseDTO createUser(@Valid UserRequestDTO requestDTO) {
         var existingUser = this.getUserByEmail(requestDTO.email());
         if (existingUser.isPresent()) {
@@ -59,20 +61,24 @@ public class UserService {
         return this.userMapper.toUserResponseDTO(savedUser);
     }
 
+    @Transactional(readOnly = true)
     public UserResponseDTO getUserById(UUID id) {
         var user = this.userRepository.findById(id)
                 .orElseThrow(() -> new UserNotFoundException(id));
         return this.userMapper.toUserResponseDTO(user);
     }
 
+    @Transactional(readOnly = true)
     public Optional<UserModel> getUserByEmail(String email) {
         return userRepository.findByEmail(email);
     }
 
+    @Transactional
     public UserModel saveUser(UserModel user) {
         return this.userRepository.save(user);
     }
 
+    @Transactional
     public UserModel processOAuthUser(String email, String name, String pfpUrl, String provider) {
         AuthProvider authProvider = provider.equals("facebook") ? AuthProvider.FACEBOOK : AuthProvider.GOOGLE;
 
@@ -89,6 +95,7 @@ public class UserService {
                 });
     }
 
+    @Transactional(readOnly = true)
     public List<UserResponseDTO> getAllUsers() {
         var users = this.userRepository.findAll();
         if (users.isEmpty()) {
@@ -97,6 +104,7 @@ public class UserService {
         return users.stream().map(this.userMapper::toUserResponseDTO).toList();
     }
 
+    @Transactional
     public UserResponseDTO updateUserById(UUID id, UserRequestDTO requestDTO) {
         var user = this.userRepository.findById(id)
                 .orElseThrow(() -> new UserNotFoundException(id));
@@ -115,6 +123,7 @@ public class UserService {
         return this.userMapper.toUserResponseDTO(response);
     }
 
+    @Transactional(readOnly = true)
     public UserModel getAuthenticatedUser(Authentication authentication) {
         if (authentication.getPrincipal() instanceof UserModel userModel) {
             return userModel;
@@ -125,6 +134,7 @@ public class UserService {
                 .orElseThrow(() -> new UserNotFoundException("Usuário autenticado não encontrado."));
     }
 
+    @Transactional
     public UserResponseDTO enableUser(ActivateUserDTO activateDto) {
         UserModel user = this.getUserByEmail(activateDto.email())
                 .orElseThrow(() -> new UserNotFoundException(activateDto.email()));
@@ -134,6 +144,7 @@ public class UserService {
         return userMapper.toUserResponseDTO(user);
     }
 
+    @Transactional
     public UserResponseDTO setUserToHost(Authentication authentication) {
         var email = authentication.getName();
         if (email == null) {
@@ -148,6 +159,7 @@ public class UserService {
         return userMapper.toUserResponseDTO(user);
     }
 
+    @Transactional
     public UserResponseDTO updateCurrentUser(UpdateUserDTO userDTO, Authentication authentication) {
 
         var email = authentication.getName();
@@ -178,6 +190,7 @@ public class UserService {
     }
 
 
+    @Transactional
     public UserResponseDTO deleteUser(UUID id) {
         var user = this.userRepository.findById(id)
                 .orElseThrow(() -> new UserNotFoundException(id));
@@ -185,6 +198,7 @@ public class UserService {
         return this.userMapper.toUserResponseDTO(user);
     }
 
+    @Transactional
     public UserResponseDTO forgotPassword(ForgotPasswordDTO dto) {
         var user = this.getUserByEmail(dto.email()).orElseThrow(() -> new UserNotFoundException(dto.email()));
 

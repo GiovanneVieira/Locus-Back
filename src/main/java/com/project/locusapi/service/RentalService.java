@@ -8,12 +8,13 @@ import com.project.locusapi.event.metrics.RentalStatusChangedEvent;
 import com.project.locusapi.exception.business.AddressNotFoundException;
 import com.project.locusapi.exception.business.RentalNotFoundException;
 import com.project.locusapi.exception.business.UserNotFoundException;
+import com.project.locusapi.mapper.RentalMapper;
 import com.project.locusapi.model.RentableAddressModel;
 import com.project.locusapi.model.Rental;
-import com.project.locusapi.model.s3filemetadata.RentableAddressImage;
 import com.project.locusapi.repository.RentableAddressRepository;
 import com.project.locusapi.repository.RentalRepository;
 import com.project.locusapi.repository.UserRepository;
+import com.project.locusapi.service.rental.RentalStatusTransitionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.access.AccessDeniedException;
@@ -22,7 +23,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.UUID;
 
@@ -34,6 +34,8 @@ public class RentalService {
     private final RentableAddressRepository rentableAddressRepository;
     private final UserRepository userRepository;
     private final ApplicationEventPublisher eventPublisher;
+    private final RentalMapper rentalMapper;
+    private final RentalStatusTransitionService statusTransitionService;
 
     @Transactional
     public RentalResponseDTO create(UUID addressId, UUID userId, RentalRequestDTO dto) {
@@ -45,18 +47,10 @@ public class RentalService {
         }
 
         validateDates(dto, address);
-
-        if (dto.guests() > address.getMaxGuests()) {
-            throw new IllegalArgumentException(
-                    "O imóvel comporta no máximo " + address.getMaxGuests() + " hóspedes.");
-        }
+        validateGuestCapacity(dto, address);
 
         var renter = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException(userId));
-
-        String message = (dto.message() != null && !dto.message().isBlank())
-                ? dto.message().trim()
-                : null;
 
         var rental = Rental.builder()
                 .renter(renter)
@@ -64,70 +58,46 @@ public class RentalService {
                 .checkIn(dto.checkIn().atStartOfDay())
                 .checkOut(dto.checkOut().atStartOfDay())
                 .numberOfGuests(dto.guests())
-                .message(message)
+                .message(normalizeMessage(dto.message()))
                 .priceAtTheTime(address.getPricePerNight().doubleValue())
                 .status(RentalStatus.PENDING)
                 .build();
 
         var savedRental = rentalRepository.save(rental);
         eventPublisher.publishEvent(new RentalCreatedEvent(savedRental.getId(), renter.getId(), address.getId(), savedRental.getStatus(), LocalDateTime.now()));
-        return toResponse(savedRental);
+        return rentalMapper.toResponse(savedRental);
     }
 
     @Transactional(readOnly = true)
     public List<RentalResponseDTO> getMyBookings(UUID userId) {
-        return rentalRepository.findAllByRenterIdOrderByCreatedAtDesc(userId)
-                .stream().map(this::toResponse).toList();
+        return rentalRepository.findBookingsWithDetailsByRenterId(userId)
+                .stream()
+                .map(rentalMapper::toResponse)
+                .toList();
     }
 
     @Transactional(readOnly = true)
     public List<RentalResponseDTO> getHostBookings(UUID hostId) {
-        return rentalRepository.findAllByRentableAddress_User_IdOrderByCreatedAtDesc(hostId)
-                .stream().map(this::toResponse).toList();
+        return rentalRepository.findBookingsWithDetailsByHostId(hostId)
+                .stream()
+                .map(rentalMapper::toResponse)
+                .toList();
     }
 
     @Transactional
     public RentalResponseDTO updateStatus(UUID rentalId, UUID userId, RentalStatus newStatus) {
-        var rental = rentalRepository.findById(rentalId)
+        var rental = rentalRepository.findByIdWithDetails(rentalId)
                 .orElseThrow(() -> new RentalNotFoundException(rentalId));
 
-        boolean isGuest = rental.getRenter().getId().equals(userId);
-        boolean isHost = rental.getRentableAddress().getUser().getId().equals(userId);
-
-        if (!isGuest && !isHost) {
-            throw new AccessDeniedException("Você não tem permissão sobre esta reserva.");
-        }
-
-        switch (newStatus) {
-            case CANCELLED -> {
-                if (!isGuest) {
-                    throw new AccessDeniedException("Apenas o hóspede pode cancelar a reserva.");
-                }
-                if (rental.getStatus() == RentalStatus.DECLINED || rental.getStatus() == RentalStatus.CANCELLED) {
-                    throw new IllegalArgumentException("Esta reserva não pode mais ser cancelada.");
-                }
-            }
-            case CONFIRMED, DECLINED -> {
-                if (!isHost) {
-                    throw new AccessDeniedException("Apenas o anfitrião pode aceitar ou recusar a reserva.");
-                }
-                if (rental.getStatus() != RentalStatus.PENDING) {
-                    throw new IllegalArgumentException("Só é possível responder a reservas pendentes.");
-                }
-            }
-            default -> throw new IllegalArgumentException("Transição de status inválida.");
-        }
+        statusTransitionService.validate(rental, userId, newStatus);
 
         RentalStatus previousStatus = rental.getStatus();
         rental.setStatus(newStatus);
+
         var savedRental = rentalRepository.save(rental);
         eventPublisher.publishEvent(new RentalStatusChangedEvent(savedRental.getId(), previousStatus, newStatus, LocalDateTime.now()));
-        return toResponse(savedRental);
+        return rentalMapper.toResponse(savedRental);
     }
-
-    // =========================================================================
-    // AUXILIARES
-    // =========================================================================
 
     private void validateDates(RentalRequestDTO dto, RentableAddressModel address) {
         if (!dto.checkOut().isAfter(dto.checkIn())) {
@@ -137,53 +107,20 @@ public class RentalService {
             throw new IllegalArgumentException("A data de entrada não pode estar no passado.");
         }
         if (address.getAvailableFrom() != null && dto.checkIn().isBefore(address.getAvailableFrom())) {
-            throw new IllegalArgumentException(
-                    "O imóvel só está disponível a partir de " + address.getAvailableFrom() + ".");
+            throw new IllegalArgumentException("O imóvel só está disponível a partir de " + address.getAvailableFrom() + ".");
         }
         if (address.getAvailableTo() != null && dto.checkOut().isAfter(address.getAvailableTo())) {
-            throw new IllegalArgumentException(
-                    "O imóvel só está disponível até " + address.getAvailableTo() + ".");
+            throw new IllegalArgumentException("O imóvel só está disponível até " + address.getAvailableTo() + ".");
         }
     }
 
-    private RentalResponseDTO toResponse(Rental rental) {
-        var address = rental.getRentableAddress();
-        var host = address.getUser();
-        var guest = rental.getRenter();
+    private void validateGuestCapacity(RentalRequestDTO dto, RentableAddressModel address) {
+        if (dto.guests() > address.getMaxGuests()) {
+            throw new IllegalArgumentException("O imóvel comporta no máximo " + address.getMaxGuests() + " hóspedes.");
+        }
+    }
 
-        LocalDate checkIn = rental.getCheckIn().toLocalDate();
-        LocalDate checkOut = rental.getCheckOut().toLocalDate();
-        int nights = (int) ChronoUnit.DAYS.between(checkIn, checkOut);
-        int pricePerNight = rental.getPriceAtTheTime() != null ? rental.getPriceAtTheTime().intValue() : 0;
-
-        UUID coverImageId = address.getImages().stream()
-                .filter(RentableAddressImage::isMain)
-                .map(RentableAddressImage::getId)
-                .findFirst()
-                .orElseGet(() -> address.getImages().stream()
-                        .map(RentableAddressImage::getId)
-                        .findFirst()
-                        .orElse(null));
-
-        return new RentalResponseDTO(
-                rental.getId(),
-                address.getId(),
-                address.getTitle(),
-                address.getCity(),
-                coverImageId,
-                host.getId(),
-                host.getName(),
-                guest.getId(),
-                guest.getName(),
-                checkIn,
-                checkOut,
-                rental.getNumberOfGuests(),
-                nights,
-                pricePerNight,
-                nights * pricePerNight,
-                rental.getStatus(),
-                rental.getMessage(),
-                rental.getCreatedAt()
-        );
+    private String normalizeMessage(String message) {
+        return message != null && !message.isBlank() ? message.trim() : null;
     }
 }
