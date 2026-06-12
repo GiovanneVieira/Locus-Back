@@ -34,9 +34,11 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<AuthResponseDTO> login(@RequestBody @Valid AuthRequestDTO userDto) {
+    public ResponseEntity<AuthResponseDTO> login(
+            @RequestBody @Valid AuthRequestDTO userDto,
+            @RequestHeader(value = HttpHeaders.USER_AGENT, required = false) String userAgent) {
         // 1. O serviço devolve o AuthResultDTO completo (com os cookies e o DTO de resposta)
-        AuthResultDTO result = authService.authenticateUser(userDto);
+        AuthResultDTO result = authService.authenticateUser(userDto, userAgent);
 
         // 2. Passamos a lista de cookies extraída do Record para o helper
         // 3. Definimos o corpo da resposta com o AuthResponseDTO contido no Record

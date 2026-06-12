@@ -6,17 +6,23 @@ import com.project.locusapi.dto.auth.AuthResponseDTO;
 import com.project.locusapi.dto.auth.AuthResultDTO;
 import com.project.locusapi.dto.user.UserRequestDTO;
 import com.project.locusapi.dto.user.UserResponseDTO;
+import com.project.locusapi.event.metrics.LoginFailedEvent;
+import com.project.locusapi.event.metrics.LoginSucceededEvent;
+import com.project.locusapi.event.metrics.UserRegisteredEvent;
 import com.project.locusapi.mapper.UserMapper;
 import com.project.locusapi.model.UserModel;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.ResponseCookie;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -31,6 +37,7 @@ public class AuthService {
     private final UserDetailsService userDetailsService;
     private final EmailService emailService;
     private final OTPService otpService;
+    private final ApplicationEventPublisher eventPublisher;
 
     public UserResponseDTO registerUser(@Valid UserRequestDTO userDto) {
         return userService.createUser(userDto);
@@ -38,18 +45,40 @@ public class AuthService {
 
     @Transactional
     public AuthResultDTO authenticateUser(@Valid AuthRequestDTO userDto) {
-        var authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(userDto.email(), userDto.password())
-        );
-        return generateAuthResult((UserModel) authentication.getPrincipal());
+        return authenticateUser(userDto, null);
+    }
+
+    @Transactional
+    public AuthResultDTO authenticateUser(@Valid AuthRequestDTO userDto, String userAgent) {
+        try {
+            var authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(userDto.email(), userDto.password())
+            );
+            UserModel user = (UserModel) authentication.getPrincipal();
+            eventPublisher.publishEvent(new LoginSucceededEvent(user.getId(), user.getEmail(), userAgent, LocalDateTime.now()));
+            return generateAuthResult(user);
+        } catch (AuthenticationException ex) {
+            eventPublisher.publishEvent(new LoginFailedEvent(userDto.email(), userAgent, ex.getClass().getSimpleName(), LocalDateTime.now()));
+            throw ex;
+        }
     }
 
     @Transactional
     public AuthResultDTO loginOAuth2User(String email, String name, String pfpUrl, String provider) {
-        UserModel user = userService.getUserByEmail(email)
-                .orElseGet(() -> userService.processOAuthUser(email, name, pfpUrl, provider));
+        return loginOAuth2User(email, name, pfpUrl, provider, null);
+    }
+
+    @Transactional
+    public AuthResultDTO loginOAuth2User(String email, String name, String pfpUrl, String provider, String userAgent) {
+        var existingUser = userService.getUserByEmail(email);
+        boolean newUser = existingUser.isEmpty();
+        UserModel user = existingUser.orElseGet(() -> userService.processOAuthUser(email, name, pfpUrl, provider));
         user.setEnabled(true);
         userService.saveUser(user);
+        if (newUser) {
+            eventPublisher.publishEvent(new UserRegisteredEvent(user.getId(), user.getEmail(), user.isEnabled(), user.getAuthProvider(), LocalDateTime.now()));
+        }
+        eventPublisher.publishEvent(new LoginSucceededEvent(user.getId(), user.getEmail(), userAgent, LocalDateTime.now()));
         return generateAuthResult(user);
     }
 

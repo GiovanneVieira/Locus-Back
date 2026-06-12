@@ -48,7 +48,7 @@ public class CustomOAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHa
                 .map(e -> e.extractProfilePicture(oAuth2User))
                 .orElse(null);
 
-        var authResult = authService.loginOAuth2User(email, name, pfpUrl, provider);
+        var authResult = authService.loginOAuth2User(email, name, pfpUrl, provider, request.getHeader(HttpHeaders.USER_AGENT));
 
         // Injetamos os Cookies no Header da resposta
         authResult.cookies().forEach(cookie ->

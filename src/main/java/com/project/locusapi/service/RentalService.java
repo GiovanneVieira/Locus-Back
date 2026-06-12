@@ -3,6 +3,8 @@ package com.project.locusapi.service;
 import com.project.locusapi.constant.RentalStatus;
 import com.project.locusapi.dto.rental.RentalRequestDTO;
 import com.project.locusapi.dto.rental.RentalResponseDTO;
+import com.project.locusapi.event.metrics.RentalCreatedEvent;
+import com.project.locusapi.event.metrics.RentalStatusChangedEvent;
 import com.project.locusapi.exception.business.AddressNotFoundException;
 import com.project.locusapi.exception.business.RentalNotFoundException;
 import com.project.locusapi.exception.business.UserNotFoundException;
@@ -13,11 +15,13 @@ import com.project.locusapi.repository.RentableAddressRepository;
 import com.project.locusapi.repository.RentalRepository;
 import com.project.locusapi.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.UUID;
@@ -29,6 +33,7 @@ public class RentalService {
     private final RentalRepository rentalRepository;
     private final RentableAddressRepository rentableAddressRepository;
     private final UserRepository userRepository;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Transactional
     public RentalResponseDTO create(UUID addressId, UUID userId, RentalRequestDTO dto) {
@@ -64,7 +69,9 @@ public class RentalService {
                 .status(RentalStatus.PENDING)
                 .build();
 
-        return toResponse(rentalRepository.save(rental));
+        var savedRental = rentalRepository.save(rental);
+        eventPublisher.publishEvent(new RentalCreatedEvent(savedRental.getId(), renter.getId(), address.getId(), savedRental.getStatus(), LocalDateTime.now()));
+        return toResponse(savedRental);
     }
 
     @Transactional(readOnly = true)
@@ -111,8 +118,11 @@ public class RentalService {
             default -> throw new IllegalArgumentException("Transição de status inválida.");
         }
 
+        RentalStatus previousStatus = rental.getStatus();
         rental.setStatus(newStatus);
-        return toResponse(rentalRepository.save(rental));
+        var savedRental = rentalRepository.save(rental);
+        eventPublisher.publishEvent(new RentalStatusChangedEvent(savedRental.getId(), previousStatus, newStatus, LocalDateTime.now()));
+        return toResponse(savedRental);
     }
 
     // =========================================================================

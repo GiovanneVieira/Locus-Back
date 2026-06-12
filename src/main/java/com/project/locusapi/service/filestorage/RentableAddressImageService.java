@@ -1,12 +1,14 @@
 package com.project.locusapi.service.filestorage;
 
 import com.project.locusapi.dto.s3.ImageDetailsResponse;
+import com.project.locusapi.event.metrics.S3UploadTrackedEvent;
 import com.project.locusapi.exception.file.FileStorageException;
 import com.project.locusapi.exception.file.StorageFileNotFoundException;
 import com.project.locusapi.model.RentableAddressModel;
 import com.project.locusapi.model.s3filemetadata.RentableAddressImage;
 import com.project.locusapi.repository.s3file.RentableAddressImageRepository;
 import com.project.locusapi.service.S3Service;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -15,6 +17,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -24,10 +27,12 @@ public class RentableAddressImageService {
 
     private final S3Service s3Service;
     private final RentableAddressImageRepository imageRepository;
+    private final ApplicationEventPublisher eventPublisher;
 
-    public RentableAddressImageService(S3Service s3Service, RentableAddressImageRepository imageRepository) {
+    public RentableAddressImageService(S3Service s3Service, RentableAddressImageRepository imageRepository, ApplicationEventPublisher eventPublisher) {
         this.s3Service = s3Service;
         this.imageRepository = imageRepository;
+        this.eventPublisher = eventPublisher;
     }
 
     /**
@@ -54,6 +59,7 @@ public class RentableAddressImageService {
                         .build();
 
                 RentableAddressImage saved = imageRepository.save(imageMetadata);
+                eventPublisher.publishEvent(new S3UploadTrackedEvent(saved.getId(), hostId, saved.getFileSize(), saved.getContentType(), LocalDateTime.now()));
                 uploadedImages.add(new ImageDetailsResponse(saved.getId(), saved.getOriginalName(), saved.getS3Key()));
 
             } catch (IOException e) {
@@ -106,7 +112,9 @@ public class RentableAddressImageService {
                 .isMain(isMain)
                 .build();
 
-        return imageRepository.save(imageMetadata);
+        RentableAddressImage saved = imageRepository.save(imageMetadata);
+        eventPublisher.publishEvent(new S3UploadTrackedEvent(saved.getId(), hostId, saved.getFileSize(), saved.getContentType(), LocalDateTime.now()));
+        return saved;
     }
 
     /**
